@@ -20,7 +20,6 @@ spring:
               - email
         provider:
           keycloak:
-            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/wiki}
             authorization-uri: ${KEYCLOAK_AUTH_URI:http://keycloak:8080/realms/wiki/protocol/openid-connect/auth}
             token-uri: ${KEYCLOAK_TOKEN_URI:http://keycloak:8080/realms/wiki/protocol/openid-connect/token}
             user-info-uri: ${KEYCLOAK_USERINFO_URI:http://keycloak:8080/realms/wiki/protocol/openid-connect/userinfo}

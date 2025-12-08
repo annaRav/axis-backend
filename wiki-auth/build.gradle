@@ -39,7 +39,7 @@ jib {
     }
     to {
         image = 'wiki/auth'
-        tags = [version, 'latest']
+        tags = [version.toString(), 'latest']
     }
     container {
         jvmFlags = ['-Xms256m', '-Xmx512m']

@@ -50,3 +50,115 @@ metadata:
 data:
   RABBITMQ_DEFAULT_USER: wiki
   RABBITMQ_DEFAULT_VHOST: wiki
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-import
+  namespace: wiki
+data:
+  wiki-realm.json: |
+    {
+      "realm": "wiki",
+      "enabled": true,
+      "sslRequired": "none",
+      "registrationAllowed": true,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "resetPasswordAllowed": true,
+      "editUsernameAllowed": false,
+      "bruteForceProtected": true,
+      "permanentLockout": false,
+      "maxFailureWaitSeconds": 900,
+      "minimumQuickLoginWaitSeconds": 60,
+      "waitIncrementSeconds": 60,
+      "quickLoginCheckMilliSeconds": 1000,
+      "maxDeltaTimeSeconds": 43200,
+      "failureFactor": 30,
+      "defaultSignatureAlgorithm": "RS256",
+      "offlineSessionMaxLifespanEnabled": false,
+      "offlineSessionMaxLifespan": 5184000,
+      "clients": [
+        {
+          "clientId": "wiki-backend",
+          "enabled": true,
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "secret": "secret",
+          "redirectUris": [
+            "http://localhost:8080/*",
+            "http://localhost:8081/*",
+            "http://wiki-gateway:8080/*",
+            "http://wiki-auth:8081/*"
+          ],
+          "webOrigins": [
+            "http://localhost:8080",
+            "http://localhost:8081"
+          ],
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": true,
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "nodeReRegistrationTimeout": -1,
+          "defaultClientScopes": [
+            "web-origins",
+            "acr",
+            "profile",
+            "roles",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
+          ]
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "user",
+            "description": "User role"
+          },
+          {
+            "name": "admin",
+            "description": "Administrator role"
+          }
+        ]
+      },
+      "users": [
+        {
+          "username": "admin",
+          "enabled": true,
+          "email": "admin@wiki.local",
+          "firstName": "Admin",
+          "lastName": "User",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "admin",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["admin", "user"]
+        },
+        {
+          "username": "user",
+          "enabled": true,
+          "email": "user@wiki.local",
+          "firstName": "Test",
+          "lastName": "User",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "user",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["user"]
+        }
+      ]
+    }

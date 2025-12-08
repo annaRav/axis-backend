@@ -15,7 +15,11 @@ dependencies {
     implementation project(':wiki-common')
 
     // Spring Cloud Gateway
-    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+    implementation('org.springframework.cloud:spring-cloud-starter-gateway') {
+        // Оскільки це чистий WebFlux, виключаємо всі можливі залежності Web MVC
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -36,7 +40,7 @@ jib {
     }
     to {
         image = 'wiki/gateway'
-        tags = [version, 'latest']
+        tags = [version.toString(), 'latest']
     }
     container {
         jvmFlags = ['-Xms256m', '-Xmx512m']

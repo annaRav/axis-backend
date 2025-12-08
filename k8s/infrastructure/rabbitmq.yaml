@@ -46,14 +46,18 @@ spec:
             - ping
           initialDelaySeconds: 60
           periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
         readinessProbe:
           exec:
             command:
             - rabbitmq-diagnostics
             - -q
             - check_running
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
       volumes:
       - name: rabbitmq-storage
         emptyDir: {}
