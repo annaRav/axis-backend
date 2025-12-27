@@ -1,0 +1,81 @@
+# Claude Code Ignore File
+# Similar to .gitignore, this file tells Claude Code which files/directories to exclude
+# from context to improve performance and focus on relevant code
+
+# Build outputs and caches
+build/
+.gradle/
+out/
+target/
+bin/
+
+# IDE specific files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# Gradle wrapper (binary)
+gradle/wrapper/gradle-wrapper.jar
+
+# Operating system files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Dependencies and packages
+node_modules/
+.npm/
+.yarn/
+
+# Generated sources
+**/generated/
+**/generated-sources/
+
+# Test coverage reports
+coverage/
+.nyc_output/
+jacoco/
+*.exec
+
+# Database files (if any local DBs)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files with secrets (already in .gitignore, but double-safe)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+credentials.json
+
+# Large binary files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Documentation builds
+docs/_build/
+site/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup

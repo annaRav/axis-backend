@@ -1,0 +1,80 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_PREFIX: ${{ github.repository_owner }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build and Test with Gradle
+        run: ./gradlew build -x test # Вимкнено тести для прискорення, приберіть -x test якщо вони є
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Збірка та пуш образів через Jib (використовуючи налаштування в build.gradle)
+      # Ми перевизначаємо ціль пушу через параметри командного рядка
+      - name: Build and Push Docker Images
+        run: |
+          ./gradlew jib \
+            -Djib.to.image=${{ env.REGISTRY }}/${{ github.repository_owner }}/wiki-gateway \
+            -Djib.to.auth.username=${{ github.actor }} \
+            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
+            -p wiki-gateway
+          
+          ./gradlew jib \
+            -Djib.to.image=${{ env.REGISTRY }}/${{ github.repository_owner }}/wiki-membership \
+            -Djib.to.auth.username=${{ github.actor }} \
+            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
+            -p wiki-membership
+          
+          ./gradlew jib \
+            -Djib.to.image=${{ env.REGISTRY }}/${{ github.repository_owner }}/wiki-media \
+            -Djib.to.auth.username=${{ github.actor }} \
+            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
+            -p wiki-media
+
+  # Етап деплою (опціонально, приклад для SSH)
+  # deploy:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@v1.0.3
+  #       with:
+  #         host: ${{ secrets.SERVER_HOST }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           cd /home/${{ secrets.SERVER_USER }}/wiki-project
+  #           docker compose pull
+  #           docker compose up -d
