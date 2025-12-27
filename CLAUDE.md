@@ -58,22 +58,6 @@ skaffold run
 skaffold delete
 ```
 
-### Testing
-
-```bash
-# Run all tests
-./gradlew test
-
-# Run tests for specific service
-./gradlew :wiki-membership:test
-
-# Run single test class
-./gradlew :wiki-membership:test --tests "OrganizationServiceTest"
-
-# Run with coverage
-./gradlew test jacocoTestReport
-```
-
 ### Kubernetes Operations
 
 ```bash
@@ -253,3 +237,29 @@ All routes require valid JWT authentication except `/actuator/**`.
 4. **Entity Exposure**: Never return entities from controllers, always use DTOs
 5. **JPA ddl-auto**: Always use `validate`, never `update` or `create-drop`
 6. **Keycloak URL**: Use internal service name `http://keycloak:8080` not `localhost:8180` in configs
+
+## Maintaining This Documentation
+
+**IMPORTANT**: Claude must proactively update this CLAUDE.md file after implementing any of the following major changes:
+
+### When to Update CLAUDE.md
+
+- **New Microservices**: Add to the Microservices section with port, purpose, and technology stack
+- **New Endpoints/Controllers**: Update Gateway Routing section or add service-specific endpoint documentation
+- **Database Schema Changes**: Document new entities, migrations, or schema patterns in relevant sections
+- **Authentication/Security Changes**: Update security configuration, new roles, or changed access patterns
+- **Infrastructure Changes**: New databases, message queues, caches, or external service integrations
+- **Build/Deployment Changes**: Updates to Gradle configuration, Skaffold, Kubernetes manifests, or deployment processes
+- **New Architecture Patterns**: Document new conventions, patterns, or coding standards established
+- **New Common Pitfalls**: Add issues discovered that developers should be aware of
+
+### Other Documentation Files
+
+While CLAUDE.md is the primary file, keep these files synchronized as the project evolves:
+
+| File | Update When | Purpose |
+|------|-------------|---------|
+| **CHANGELOG.md** | After completing features, fixes, or releases | Track all notable changes following Keep a Changelog format |
+| **.claudeignore** | New build dirs, generated code, large binary directories | Excludes files from Claude's context for better performance |
+| **README.md** | Major project changes, setup instructions | General project documentation (Claude reads this too) |
+| **.mcp.json** | New MCP servers for databases/tools | External tool integrations (e.g., postgres-app, postgres-keycloak) |

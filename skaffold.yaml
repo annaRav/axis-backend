@@ -57,6 +57,26 @@ portForward:
     namespace: wiki
     port: 15672
     localPort: 15672
+  - resourceType: service
+    resourceName: postgres-app
+    namespace: wiki
+    port: 5432
+    localPort: 5433
+  - resourceType: service
+    resourceName: postgres-keycloak
+    namespace: wiki
+    port: 5432
+    localPort: 5434
+  - resourceType: service
+    resourceName: mongodb
+    namespace: wiki
+    port: 27017
+    localPort: 27017
+  - resourceType: service
+    resourceName: redis
+    namespace: wiki
+    port: 6379
+    localPort: 6379
 
 profiles:
   - name: dev
