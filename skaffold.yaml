@@ -20,6 +20,11 @@ build:
       jib:
         project: wiki-media
         type: gradle
+    - image: wiki/message
+      context: .
+      jib:
+        project: wiki-message
+        type: gradle
   local:
     push: false
     useBuildkit: true
@@ -40,6 +45,7 @@ deploy:
       - k8s/services/wiki-gateway.yaml
       - k8s/services/wiki-membership.yaml
       - k8s/services/wiki-media.yaml
+      - k8s/services/wiki-message.yaml
 
 portForward:
   - resourceType: service
@@ -77,6 +83,11 @@ portForward:
     namespace: wiki
     port: 6379
     localPort: 6379
+  - resourceType: service
+    resourceName: wiki-message
+    namespace: wiki
+    port: 8084
+    localPort: 8084
 
 profiles:
   - name: dev
@@ -100,5 +111,11 @@ profiles:
           context: .
           jib:
             project: wiki-media
+            type: gradle
+            args: ["--no-daemon"]
+        - image: wiki/message
+          context: .
+          jib:
+            project: wiki-message
             type: gradle
             args: ["--no-daemon"]

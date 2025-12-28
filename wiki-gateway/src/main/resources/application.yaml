@@ -23,6 +23,12 @@ spring:
             - Path=/api/media/**
           filters:
             - StripPrefix=0
+        - id: message-service
+          uri: http://wiki-message:8084
+          predicates:
+            - Path=/api/chats/**
+          filters:
+            - StripPrefix=0
 
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
