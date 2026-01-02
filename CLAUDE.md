@@ -112,14 +112,14 @@ The platform uses Keycloak for OAuth2/OIDC authentication:
 
 - **Gateway**: Uses WebFlux reactive security with JWT resource server
 - **Services**: Standard Spring Security with JWT resource server
-- **Custom JWT converter**: `JwtAuthenticationConverter` in axis-common extracts realm roles and converts to Spring Security authorities
-- **Security utilities**: `SecurityUtils` class provides helper methods to extract user ID, email, username, and roles from JWT
+- **Custom JWT converter**: `JwtAuthenticationConverter` in axis-common extracts user information from JWT tokens
+- **Security utilities**: `SecurityUtils` class provides helper methods to extract user ID, email, and username from JWT
 
 Access current user information:
 ```java
 UUID userId = SecurityUtils.getCurrentUserIdAsUUID().orElseThrow();
 String email = SecurityUtils.getCurrentUserEmail().orElse(null);
-boolean isAdmin = SecurityUtils.hasRole("admin");
+String username = SecurityUtils.getCurrentUsername().orElse(null);
 ```
 
 ### Exception Handling
@@ -207,10 +207,8 @@ All resources deployed to `axis` namespace.
 
 Realm `axis` is auto-imported with:
 - Client: `axis-backend` (secret: `secret`)
-- Roles: `user`, `admin`
 - Test users:
-  - `admin` / `admin` (roles: admin, user)
-  - `user` / `user` (role: user)
+  - `testuser` / `testuser`
 
 ### Infrastructure Dependencies
 
@@ -250,7 +248,7 @@ All routes require valid JWT authentication except `/actuator/**`.
 4. **Entity Exposure**: Never return entities from controllers, always use DTOs
 5. **JPA ddl-auto**: Always use `validate`, never `update` or `create-drop`
 6. **Keycloak URL**: Use internal service name `http://keycloak:8080` not `localhost:8180` in configs
-7. **Namespace**: Always use `axis` namespace, not `wiki` or `default`
+7. **Namespace**: Always use `axis` namespace, not `default`
 
 ## Maintaining This Documentation
 
@@ -278,6 +276,3 @@ While CLAUDE.md is the primary file, keep these files synchronized as the projec
 | **README.md** | Major project changes, setup instructions | General project documentation (Claude reads this too) |
 | **.mcp.json** | New MCP servers for databases/tools | External tool integrations (e.g., postgres-app) |
 
-## Migration History
-
-This project was migrated from wiki-backend to axis-backend on 2026-01-02. The platform's focus shifted from a wiki system to a life goals planning platform. See [MIGRATION_TO_AXIS.md](MIGRATION_TO_AXIS.md) for complete migration details.

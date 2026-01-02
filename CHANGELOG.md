@@ -7,72 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Migration documentation (MIGRATION_TO_AXIS.md)
-- Life goals planning domain model documentation
-- Board system architecture documentation
-
-### Changed
-- **BREAKING**: Complete project restructuring from wiki-backend to axis-backend
-- **BREAKING**: Renamed all modules: wiki-* → axis-*
-- **BREAKING**: Renamed Java packages: com.wiki.* → com.axis.*
-- **BREAKING**: Renamed Kubernetes namespace: wiki → axis
-- **BREAKING**: Renamed Keycloak realm: wiki → axis
-- **BREAKING**: Renamed Docker images: wiki/* → axis/*
-- Project focus: Wiki platform → Life goals planning platform (Trello-like)
-- Updated all configuration files for axis naming
-- Updated all Kubernetes manifests
-- Updated Skaffold configuration
-- Updated documentation (README.md, CLAUDE.md, IMPLEMENTATION_PLAN.md)
-
-### Removed
-- **BREAKING**: wiki-membership microservice (removed completely)
-- **BREAKING**: wiki-message microservice (removed completely)
-- All database schemas for removed services
+### Planned
+- axis-goal microservice for goals management
+- Board system for organizing goals
+- Progress tracking and analytics
+- Collaboration features
 
 ## [0.2.0] - 2024-12-21
 
 ### Added
-- **wiki-media** microservice for media management
+- **axis-media** microservice for media management with MongoDB storage
 - MCP (Model Context Protocol) integration for database access
-- Agent-based development tooling
+- Agent-based development tooling (.claude/agents/)
+- Skills system for project-specific AI assistance (.claude/skills/)
+- Health check endpoints for all services
+- Media upload and retrieval functionality
 
 ### Changed
-- Renamed Organization microservice architecture
-- Refactored role management system
+- Enhanced development workflow with specialized agents
+- Improved project documentation structure
+- Optimized Skaffold configuration for faster development cycles
 
 ### Fixed
 - Skaffold startup configuration issues
-- Development environment initialization
+- Development environment initialization problems
+- MongoDB connection reliability
 
 ## [0.1.0] - 2024-12-06
 
 ### Added
-- **wiki-gateway** microservice (Spring Cloud Gateway with WebFlux)
-- **wiki-membership** microservice for organization and membership management
-- **wiki-common** shared library (security, exceptions, DTOs)
+- **axis-gateway** microservice (Spring Cloud Gateway with WebFlux)
+- **axis-common** shared library (security utilities, exception handling, DTOs)
 - Keycloak integration for OAuth2/OIDC authentication
-- PostgreSQL databases (separate for Keycloak and application)
-- MongoDB integration
-- RabbitMQ message broker
-- Redis caching
+- PostgreSQL databases (separate for Keycloak and application data)
+- MongoDB integration for document storage
+- RabbitMQ message broker for async communication
+- Redis caching layer
 - Kubernetes deployment configuration (Minikube)
-- Skaffold for local development
-- Flyway database migrations
+- Skaffold for local development workflow
+- Flyway database migration support
 - MapStruct for DTO conversions
-- Global exception handling
-- JWT authentication with custom converter
-- Security utilities for user context access
-- Actuator endpoints for health and metrics
-- OpenAPI/Swagger documentation
+- Global exception handling with `@RestControllerAdvice`
+- JWT authentication with custom converter for Keycloak realm roles
+- Security utilities (`SecurityUtils`) for user context access
+- Actuator endpoints for health checks and metrics
+- OpenAPI/Swagger documentation support
 
 ### Infrastructure
-- Kubernetes namespace `wiki`
+- Kubernetes namespace `axis`
 - PostgreSQL for Keycloak (port 5434)
 - PostgreSQL for application data (port 5433)
-- Keycloak realm `wiki` with test users
-- Gateway routing configuration
-- Docker image builds via Jib
+- Keycloak realm `axis` with client `axis-backend`
+- Test user: `testuser`/`testuser`
+- Gateway routing configuration for microservices
+- Docker image builds via Jib plugin
+- ConfigMaps and Secrets for environment configuration
+
+### Architecture
+- Clean architecture with layered approach (Entity → Repository → Service → Controller → DTO)
+- UUID primary keys for all entities
+- Service interface pattern with implementation classes
+- DTO pattern for API request/response
+- Centralized security configuration in axis-common
+- Reactive gateway with WebFlux
+- Standard Spring MVC for microservices
 
 ---
 
@@ -95,7 +93,7 @@ When making changes to the project, add entries under `[Unreleased]` section:
 ## [Unreleased]
 
 ### Added
-- New goal management endpoints in axis-goals service
+- New goal management endpoints in axis-goal service
 - Support for long-term, medium-term, and short-term goals
 
 ### Fixed

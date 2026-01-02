@@ -69,9 +69,8 @@ After deployment, Keycloak realm 'axis' is automatically configured with:
 1. Access Keycloak at http://localhost:8180
 2. Realm: `axis`
 3. Client: `axis-backend` (secret: `secret`)
-4. Test users:
-   - `admin` / `admin` (roles: admin, user)
-   - `user` / `user` (role: user)
+4. Test user:
+   - `testuser` / `testuser`
 
 ## Project Structure
 
@@ -114,10 +113,6 @@ Future Flyway migrations will be located in service-specific `src/main/resources
 2. Make changes
 3. Test locally with Skaffold
 4. Submit PR
-
-## Migration from Wiki Platform
-
-This project was migrated from wiki-backend to focus on life goals planning. See [MIGRATION_TO_AXIS.md](MIGRATION_TO_AXIS.md) for migration details.
 
 ## License
 

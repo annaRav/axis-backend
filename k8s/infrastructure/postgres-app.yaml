@@ -40,7 +40,7 @@ spec:
             command:
             - pg_isready
             - -U
-            - wiki_user
+            - axis_user
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
@@ -48,7 +48,7 @@ spec:
             command:
             - pg_isready
             - -U
-            - wiki_user
+            - axis_user
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:

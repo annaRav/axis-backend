@@ -13,18 +13,18 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/media")
-@Tag(name = "Health Check", description = "Health check endpoints for wiki-media service")
+@Tag(name = "Health Check", description = "Health check endpoints for axis-media service")
 public class HealthCheckController {
 
     @GetMapping("/health")
     @Operation(
         summary = "Health check endpoint",
-        description = "Returns the health status of the wiki-media service"
+        description = "Returns the health status of the axis-media service"
     )
     @ApiResponse(responseCode = "200", description = "Service is healthy")
     public ResponseEntity<Map<String, Object>> health() {
         return ResponseEntity.ok(Map.of(
-            "service", "wiki-media",
+            "service", "axis-media",
             "status", "UP",
             "timestamp", LocalDateTime.now(),
             "database", "MongoDB",

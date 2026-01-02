@@ -6,9 +6,9 @@
 ```yaml
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres-app}:${DB_PORT:5432}/${DB_NAME:wiki_membership}
-    username: ${DB_USERNAME:wiki_user}
-    password: ${DB_PASSWORD:wiki_password}
+    url: jdbc:postgresql://${DB_HOST:postgres-app}:${DB_PORT:5432}/${DB_NAME:axis_goal}
+    username: ${DB_USERNAME:axis_user}
+    password: ${DB_PASSWORD:axis_password}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -114,7 +114,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
 spring:
   data:
     mongodb:
-      uri: mongodb://${MONGO_USER:admin}:${MONGO_PASSWORD:admin}@${MONGO_HOST:localhost}:27017/${MONGO_DB:wiki_content}?authSource=admin
+      uri: mongodb://${MONGO_USER:admin}:${MONGO_PASSWORD:admin}@${MONGO_HOST:localhost}:27017/${MONGO_DB:axis_media}?authSource=admin
 ```
 
 ### Document Example (for future MongoDB services)

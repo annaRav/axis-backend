@@ -2,7 +2,7 @@
 
 ## Currently Implemented Services
 
-### wiki-gateway (Port 8080)
+### axis-gateway (Port 8080)
 
 API Gateway - single entry point for all clients.
 
@@ -23,75 +23,66 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: membership-service
-          uri: http://wiki-membership:8082
+        - id: media-service
+          uri: http://axis-media:8083
           predicates:
-            - Path=/api/organizations/**,/api/memberships/**,/api/users/**
+            - Path=/api/media/**
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://keycloak:8080/realms/wiki/protocol/openid-connect/certs
+          jwk-set-uri: http://keycloak:8080/realms/axis/protocol/openid-connect/certs
 ```
 
 **Security:**
 - All routes require valid JWT (except `/actuator/**`)
-- Custom `JwtAuthenticationConverter` extracts Keycloak realm roles
-- Converts roles to Spring Security authorities (ROLE_user, ROLE_admin)
+- Custom `JwtAuthenticationConverter` extracts user information from JWT tokens
+- Provides user context (user ID, email, username) to downstream services
 
 ---
 
-### wiki-membership (Port 8082)
+### axis-media (Port 8083)
 
-Organization and membership management service.
+Media file management service.
 
 **Responsibilities:**
-- Organization CRUD operations
-- User management within organizations
-- Role and permission management
-- Membership tracking
+- File upload/download
+- Image processing (resize, thumbnails)
+- Metadata extraction
+- Storage management (MongoDB)
 
 **Technology:**
 - Spring Boot Web (MVC)
-- Spring Data JPA + PostgreSQL
-- Flyway migrations
+- Spring Data MongoDB
 - Spring Security OAuth2 Resource Server
 
-**Database:** PostgreSQL (wiki_membership)
-- Table: `organizations`
-- Table: `users`
-- Table: `roles`
-- Table: `permissions`
-- Table: `user_roles`
-- Table: `role_permissions`
+**Database:** MongoDB (axis_media)
+- Collection: `media` - stores file metadata and content
 
 **Key Endpoints:**
 ```
-GET    /api/organizations
-POST   /api/organizations
-GET    /api/organizations/{id}
-PUT    /api/organizations/{id}
-DELETE /api/organizations/{id}
-GET    /api/organizations/{id}/members
+POST   /api/media/upload
+GET    /api/media/{id}
+GET    /api/media
+DELETE /api/media/{id}
+GET    /api/media/health
 ```
 
 **Architecture:**
-- Clean layered architecture: Entity → Repository → Service (Interface + Impl) → Controller → DTOs
-- UUID primary keys for all entities
-- MapStruct for entity-DTO conversions
-- Bean Validation on DTOs
-- Global exception handling via wiki-common
+- Clean layered architecture: Document → Repository → Service (Interface + Impl) → Controller → DTOs
+- MongoDB ObjectId for document IDs
+- Global exception handling via axis-common
 
 ---
 
-### wiki-common (Shared Library)
+### axis-common (Shared Library)
 
 Common components used across all microservices.
 
 **Components:**
 - **Security:**
-  - `JwtAuthenticationConverter`: Converts Keycloak JWT to Spring Security authentication
-  - `SecurityUtils`: Helper methods to extract user ID, email, roles from JWT
+  - `JwtAuthenticationConverter`: Extracts user information from Keycloak JWT tokens
+  - `SecurityUtils`: Helper methods to extract user ID, email, username from JWT
 
 - **Exception Handling:**
   - `GlobalExceptionHandler`: Centralized exception handling with `@RestControllerAdvice`
@@ -103,51 +94,61 @@ Common components used across all microservices.
   - `ApiError`: Error response with timestamp, status, message, path, field errors
 
 **Usage:**
-All microservices depend on wiki-common and inherit these capabilities automatically.
+All microservices depend on axis-common and inherit these capabilities automatically.
 
 ---
 
 ## Planned Future Services
 
-### wiki-content (Port 8081)
+### axis-goal (Port 8081)
 
-Wiki pages and content management.
+Goals management service.
 
 **Planned Responsibilities:**
-- CRUD for wiki pages
-- Version control (revisions)
-- Markdown processing
-- Content categories/tags
+- CRUD for goals (long-term, medium-term, short-term)
+- Goal status tracking
+- Progress monitoring
+- Goal categories and tags
 
-**Planned Database:** MongoDB
-- Collection: `pages`
-- Collection: `revisions`
-- Collection: `categories`
+**Planned Database:** PostgreSQL (axis_goal)
+- Table: `users` - cached user profiles from Keycloak
+- Table: `goals` - goals with type, status, dates
+
+**Planned Technology:**
+- Spring Boot Web (MVC)
+- Spring Data JPA + PostgreSQL
+- Flyway migrations
+- Spring Security OAuth2 Resource Server
 
 ---
 
-### wiki-search (Port 8083)
+### axis-board (Port 8084)
 
-Full-text search service.
+Board management service (Trello-like).
 
 **Planned Responsibilities:**
-- Indexing wiki pages
-- Full-text search
-- Search suggestions
-- Faceted search
+- Create and manage boards
+- Column/list management
+- Card positioning and ordering
+- Drag-and-drop support
 
-**Planned Database:** Elasticsearch
+**Planned Database:** PostgreSQL
+- Table: `boards`
+- Table: `columns`
+- Table: `cards` (links to goals)
 
 ---
 
-### wiki-media (Port 8084)
+## Service Communication
 
-Media file management.
+All services communicate through:
+- **Synchronous:** REST APIs via gateway
+- **Asynchronous:** RabbitMQ for event-driven communication (future)
+- **Service Discovery:** Kubernetes DNS (e.g., `http://axis-media:8083`)
 
-**Planned Responsibilities:**
-- File upload/download
-- Image processing (resize, thumbnails)
-- Metadata extraction
-- Storage management (S3-compatible)
-
-**Planned Database:** MongoDB (metadata) + S3 (files)
+**Authentication Flow:**
+1. Client obtains JWT from Keycloak
+2. Client sends request to Gateway with JWT in Authorization header
+3. Gateway validates JWT and routes to appropriate service
+4. Service validates JWT independently and extracts user context
+5. Service processes request with user context from JWT

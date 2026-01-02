@@ -1,13 +1,13 @@
 ---
 name: spring-boot-service
-description: Guide for creating and modifying Spring Boot 3 microservices in Wiki Platform. Use when creating new services, adding endpoints, implementing service layer logic, configuring databases, or following project coding standards.
+description: Guide for creating and modifying Spring Boot 3 microservices in Axis Platform. Use when creating new services, adding endpoints, implementing service layer logic, configuring databases, or following project coding standards.
 ---
 
 # Spring Boot Service Development
 
 ## Quick Start: New Service
 
-1. Copy existing service as template (e.g., `wiki-user`)
+1. Copy existing service as template (e.g., `axis-media`)
 2. Update `pom.xml`: artifactId, dependencies
 3. Update `application.yml`: port, database config
 4. Create package structure (see below)
@@ -16,8 +16,8 @@ description: Guide for creating and modifying Spring Boot 3 microservices in Wik
 ## Package Structure
 
 ```
-com.wiki.{service}/
-├── WikiServiceApplication.java
+com.axis.{service}/
+├── AxisServiceApplication.java
 ├── config/
 │   ├── SecurityConfig.java
 │   └── WebClientConfig.java
