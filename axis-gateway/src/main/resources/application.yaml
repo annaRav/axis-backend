@@ -11,6 +11,13 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: goal-service
+          uri: http://axis-goal:8081
+          predicates:
+            - Path=/api/goals/**
+          filters:
+            - StripPrefix=0
+
         - id: media-service
           uri: http://axis-media:8083
           predicates:

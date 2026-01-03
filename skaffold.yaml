@@ -10,6 +10,11 @@ build:
       jib:
         project: axis-gateway
         type: gradle
+    - image: axis/goal
+      context: .
+      jib:
+        project: axis-goal
+        type: gradle
     - image: axis/media
       context: .
       jib:
@@ -33,6 +38,7 @@ deploy:
       - k8s/infrastructure/redis.yaml
       - k8s/infrastructure/keycloak-realm-config.yaml
       - k8s/services/axis-gateway.yaml
+      - k8s/services/axis-goal.yaml
       - k8s/services/axis-media.yaml
 
 portForward:
@@ -82,6 +88,12 @@ profiles:
           context: .
           jib:
             project: axis-gateway
+            type: gradle
+            args: ["--no-daemon"]
+        - image: axis/goal
+          context: .
+          jib:
+            project: axis-goal
             type: gradle
             args: ["--no-daemon"]
         - image: axis/media
