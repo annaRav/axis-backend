@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: keycloak-realm-import
-  namespace: wiki
+  namespace: axis
 data:
-  wiki-realm.json: |
+  axis-realm.json: |
     {
-      "realm": "wiki",
+      "realm": "axis",
       "enabled": true,
       "sslRequired": "none",
       "registrationAllowed": true,
@@ -27,14 +27,14 @@ data:
       "offlineSessionMaxLifespan": 5184000,
       "clients": [
         {
-          "clientId": "wiki-backend",
+          "clientId": "axis-backend",
           "enabled": true,
           "protocol": "openid-connect",
           "publicClient": false,
           "secret": "secret",
           "redirectUris": [
             "http://localhost:8080/*",
-            "http://wiki-gateway:8080/*"
+            "http://axis-gateway:8080/*"
           ],
           "webOrigins": [
             "http://localhost:8080"
@@ -61,7 +61,7 @@ data:
           ]
         },
         {
-          "clientId": "wiki-frontend",
+          "clientId": "axis-frontend",
           "enabled": true,
           "protocol": "openid-connect",
           "publicClient": true,
@@ -94,48 +94,20 @@ data:
           ]
         }
       ],
-      "roles": {
-        "realm": [
-          {
-            "name": "user",
-            "description": "User role"
-          },
-          {
-            "name": "admin",
-            "description": "Administrator role"
-          }
-        ]
-      },
       "users": [
         {
-          "username": "admin",
+          "username": "testuser",
           "enabled": true,
-          "email": "admin@wiki.local",
-          "firstName": "Admin",
-          "lastName": "User",
-          "credentials": [
-            {
-              "type": "password",
-              "value": "admin",
-              "temporary": false
-            }
-          ],
-          "realmRoles": ["admin", "user"]
-        },
-        {
-          "username": "user",
-          "enabled": true,
-          "email": "user@wiki.local",
+          "email": "testuser@axis.local",
           "firstName": "Test",
           "lastName": "User",
           "credentials": [
             {
               "type": "password",
-              "value": "user",
+              "value": "testuser",
               "temporary": false
             }
-          ],
-          "realmRoles": ["user"]
+          ]
         }
       ]
     }

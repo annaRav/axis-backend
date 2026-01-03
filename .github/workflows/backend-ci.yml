@@ -30,7 +30,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Додаємо крок для перетворення імені власника в нижній регістр
       - name: Lowercase repository owner
         run: |
           echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_ENV}
@@ -48,19 +47,13 @@ jobs:
       - name: Build and Push Docker Images
         run: |
           ./gradlew jib \
-            -Djib.to.image=${{ env.REGISTRY }}/${{ env.OWNER_LC }}/wiki-gateway \
+            -Djib.to.image=${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway \
             -Djib.to.auth.username=${{ github.actor }} \
             -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
-            -p wiki-gateway
-          
+            -p axis-gateway
+
           ./gradlew jib \
-            -Djib.to.image=${{ env.REGISTRY }}/${{ env.OWNER_LC }}/wiki-membership \
+            -Djib.to.image=${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media \
             -Djib.to.auth.username=${{ github.actor }} \
             -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
-            -p wiki-membership
-          
-          ./gradlew jib \
-            -Djib.to.image=${{ env.REGISTRY }}/${{ env.OWNER_LC }}/wiki-media \
-            -Djib.to.auth.username=${{ github.actor }} \
-            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
-            -p wiki-media
+            -p axis-media

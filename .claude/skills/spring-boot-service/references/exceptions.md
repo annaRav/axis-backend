@@ -1,8 +1,8 @@
 # Exception Handling
 
-## Global Exception Handler (from wiki-common)
+## Global Exception Handler (from axis-common)
 
-The platform uses a centralized exception handler in the `wiki-common` module that all microservices inherit.
+The platform uses a centralized exception handler in the `axis-common` module that all microservices inherit.
 
 ```java
 @Slf4j
@@ -131,7 +131,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-## ApiError DTO (from wiki-common)
+## ApiError DTO (from axis-common)
 
 Standardized error response structure used across all microservices.
 
@@ -170,17 +170,17 @@ public class ApiError {
   "status": 400,
   "error": "Validation Failed",
   "message": "Input validation failed",
-  "path": "/api/organizations",
+  "path": "/api/goals",
   "fieldErrors": [
     {
-      "field": "name",
+      "field": "title",
       "message": "must not be blank",
       "rejectedValue": null
     },
     {
-      "field": "slug",
-      "message": "must match ^[a-z0-9-]+$",
-      "rejectedValue": "Invalid Slug!"
+      "field": "goalType",
+      "message": "must be one of: LONG_TERM, MEDIUM_TERM, SHORT_TERM",
+      "rejectedValue": "INVALID_TYPE"
     }
   ]
 }
@@ -192,8 +192,8 @@ public class ApiError {
   "timestamp": "2024-12-20T10:30:00",
   "status": 404,
   "error": "Not Found",
-  "message": "Organization not found with id: 123e4567-e89b-12d3-a456-426614174000",
-  "path": "/api/organizations/123e4567-e89b-12d3-a456-426614174000",
+  "message": "Goal not found with id: 123e4567-e89b-12d3-a456-426614174000",
+  "path": "/api/goals/123e4567-e89b-12d3-a456-426614174000",
   "fieldErrors": null
 }
 ```
@@ -212,7 +212,7 @@ public class ResourceNotFoundException extends RuntimeException {
 }
 
 // Usage
-throw new ResourceNotFoundException("Organization not found with id: " + id);
+throw new ResourceNotFoundException("Goal not found with id: " + id);
 ```
 
 ### BusinessException
@@ -235,7 +235,7 @@ public class BusinessException extends RuntimeException {
 }
 
 // Usage
-throw new BusinessException("Organization slug already exists", HttpStatus.CONFLICT);
+throw new BusinessException("Goal with this title already exists", HttpStatus.CONFLICT);
 throw new BusinessException("Invalid operation");  // Defaults to BAD_REQUEST
 ```
 
@@ -244,19 +244,16 @@ throw new BusinessException("Invalid operation");  // Defaults to BAD_REQUEST
 Create domain-specific exceptions that extend base exceptions:
 
 ```java
-public class OrganizationNotFoundException extends ResourceNotFoundException {
-    public OrganizationNotFoundException(UUID id) {
-        super("Organization not found with id: " + id);
-    }
-
-    public OrganizationNotFoundException(String slug) {
-        super("Organization not found with slug: " + slug);
+public class GoalNotFoundException extends ResourceNotFoundException {
+    public GoalNotFoundException(UUID id) {
+        super("Goal not found with id: " + id);
     }
 }
 
-public class DuplicateSlugException extends BusinessException {
-    public DuplicateSlugException(String slug) {
-        super("Organization with slug '" + slug + "' already exists", HttpStatus.CONFLICT);
+public class InvalidGoalStatusException extends BusinessException {
+    public InvalidGoalStatusException(String currentStatus, String targetStatus) {
+        super("Cannot transition from " + currentStatus + " to " + targetStatus,
+              HttpStatus.BAD_REQUEST);
     }
 }
 ```
@@ -266,37 +263,39 @@ public class DuplicateSlugException extends BusinessException {
 ```java
 @Service
 @Transactional
-public class OrganizationServiceImpl implements OrganizationService {
+public class GoalServiceImpl implements GoalService {
 
-    private final OrganizationRepository organizationRepository;
+    private final GoalRepository goalRepository;
 
     @Override
-    public OrganizationResponseDTO findById(UUID id) {
-        Organization organization = organizationRepository.findById(id)
-                .orElseThrow(() -> new OrganizationNotFoundException(id));
+    public GoalResponseDTO findById(UUID id) {
+        Goal goal = goalRepository.findById(id)
+                .orElseThrow(() -> new GoalNotFoundException(id));
 
-        return organizationMapper.toResponseDTO(organization);
+        return goalMapper.toResponseDTO(goal);
     }
 
     @Override
-    public OrganizationResponseDTO create(OrganizationRequestDTO request) {
-        // Check for duplicate slug
-        if (organizationRepository.existsBySlug(request.getSlug())) {
-            throw new DuplicateSlugException(request.getSlug());
-        }
+    public GoalResponseDTO create(GoalRequestDTO request) {
+        // Extract user from security context
+        UUID userId = SecurityUtils.getCurrentUserIdAsUUID()
+                .orElseThrow(() -> new BusinessException("User not authenticated",
+                                                         HttpStatus.UNAUTHORIZED));
 
-        Organization organization = organizationMapper.toEntity(request);
-        organization = organizationRepository.save(organization);
+        Goal goal = goalMapper.toEntity(request);
+        goal.setUserId(userId);
+        goal = goalRepository.save(goal);
 
-        return organizationMapper.toResponseDTO(organization);
+        return goalMapper.toResponseDTO(goal);
     }
 }
 ```
 
 ## Important Notes
 
-- **Automatic Handling:** All services that depend on `wiki-common` get global exception handling automatically
+- **Automatic Handling:** All services that depend on `axis-common` get global exception handling automatically
 - **No Need to Re-declare:** Don't create your own `@RestControllerAdvice` in individual services
 - **Consistent Responses:** All errors follow the same `ApiError` structure across all microservices
 - **Logging:** Errors are automatically logged at appropriate levels (warn for client errors, error for server errors)
 - **Security:** Generic error messages prevent information leakage in production
+- **User Context:** Use `SecurityUtils` to extract authenticated user information from JWT tokens
