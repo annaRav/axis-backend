@@ -46,21 +46,10 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
+        envFrom:
+        - configMapRef:
+            name: goal-db-config
         env:
-        - name: DB_HOST
-          value: "postgres-app"
-        - name: DB_PORT
-          value: "5432"
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: postgres-app-config
-              key: POSTGRES_DB
-        - name: DB_USERNAME
-          valueFrom:
-            configMapKeyRef:
-              name: postgres-app-config
-              key: POSTGRES_USER
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:

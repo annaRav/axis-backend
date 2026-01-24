@@ -8,11 +8,6 @@ import jakarta.validation.constraints.Pattern;
 
 @Schema(description = "Request to define a custom field")
 public record CustomFieldDefinitionRequest(
-        @Schema(description = "Technical key for the field", example = "budget_limit")
-        @NotBlank(message = "Field key is required")
-        @Pattern(regexp = "^[a-z0-9_]+$", message = "Key must be snake_case (lowercase, numbers, underscores)")
-        String key,
-
         @Schema(description = "Display label for the user", example = "Обмеження бюджету")
         @NotBlank(message = "Field label is required")
         String label,

@@ -18,17 +18,6 @@ public interface CustomFieldDefinitionRepository extends JpaRepository<CustomFie
     List<CustomFieldDefinition> findByGoalTypeId(UUID goalTypeId);
 
     /**
-     * Find a field definition by its technical key and goal type ID.
-     * Keys must be unique within a single GoalType.
-     */
-    Optional<CustomFieldDefinition> findByGoalTypeIdAndKey(UUID goalTypeId, String key);
-
-    /**
-     * Check if a field definition with the given key exists in a specific goal type.
-     */
-    boolean existsByGoalTypeIdAndKey(UUID goalTypeId, String key);
-
-    /**
      * Find all required fields for a specific goal type.
      * Useful for server-side validation during goal creation.
      */

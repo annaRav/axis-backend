@@ -15,7 +15,6 @@ public interface CustomFieldAnswerMapper {
      * Maps field definition properties to response for easy frontend access
      */
     @Mapping(target = "fieldDefinitionId", source = "fieldDefinition.id")
-    @Mapping(target = "fieldKey", source = "fieldDefinition.key")
     @Mapping(target = "fieldLabel", source = "fieldDefinition.label")
     @Mapping(target = "fieldType", source = "fieldDefinition.type")
     CustomFieldAnswerResponse toResponse(CustomFieldAnswer answer);

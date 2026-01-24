@@ -22,9 +22,6 @@ public class CustomFieldDefinition {
     private UUID id;
 
     @Column(nullable = false)
-    private String key;
-
-    @Column(nullable = false)
     private String label;
 
     @Enumerated(EnumType.STRING)

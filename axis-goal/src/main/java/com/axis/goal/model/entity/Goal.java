@@ -70,5 +70,5 @@ public class Goal {
         COMPLETED,
         CANCELLED,
         ON_HOLD
-    }
+    }  //TODO change sql
 }

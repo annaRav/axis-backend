@@ -20,6 +20,11 @@ build:
       jib:
         project: axis-media
         type: gradle
+    - image: axis/notification
+      context: .
+      jib:
+        project: axis-notification
+        type: gradle
   local:
     push: false
     useBuildkit: true
@@ -30,7 +35,6 @@ deploy:
       - k8s/namespace.yaml
       - k8s/config/configmaps.yaml
       - k8s/config/secrets.yaml
-      - k8s/infrastructure/postgres-keycloak.yaml
       - k8s/infrastructure/postgres-app.yaml
       - k8s/infrastructure/keycloak.yaml
       - k8s/infrastructure/mongodb.yaml
@@ -40,6 +44,7 @@ deploy:
       - k8s/services/axis-gateway.yaml
       - k8s/services/axis-goal.yaml
       - k8s/services/axis-media.yaml
+      - k8s/services/axis-notification.yaml
 
 portForward:
   - resourceType: service
@@ -62,11 +67,6 @@ portForward:
     namespace: axis
     port: 5432
     localPort: 5433
-  - resourceType: service
-    resourceName: postgres-keycloak
-    namespace: axis
-    port: 5432
-    localPort: 5434
   - resourceType: service
     resourceName: mongodb
     namespace: axis
@@ -100,5 +100,11 @@ profiles:
           context: .
           jib:
             project: axis-media
+            type: gradle
+            args: ["--no-daemon"]
+        - image: axis/notification
+          context: .
+          jib:
+            project: axis-notification
             type: gradle
             args: ["--no-daemon"]

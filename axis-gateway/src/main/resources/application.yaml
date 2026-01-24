@@ -32,6 +32,13 @@ spring:
           filters:
             - StripPrefix=0
 
+        - id: notification-service
+          uri: http://axis-notification:8082
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=0
+
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 

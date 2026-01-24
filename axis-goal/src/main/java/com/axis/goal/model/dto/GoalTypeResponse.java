@@ -11,7 +11,7 @@ public record GoalTypeResponse(
         @Schema(description = "Unique identifier of the goal type")
         UUID id,
 
-        @Schema(description = "Title of the goal type", example = "Стратегічна ціль")
+        @Schema(description = "Title of the goal type", example = "Long term goal")
         String title,
 
         @Schema(description = "Hierarchy level number", example = "1")

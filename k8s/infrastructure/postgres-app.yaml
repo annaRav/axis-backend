@@ -28,6 +28,8 @@ spec:
         volumeMounts:
         - name: postgres-app-storage
           mountPath: /var/lib/postgresql/data
+        - name: postgres-init-scripts
+          mountPath: /docker-entrypoint-initdb.d
         resources:
           requests:
             memory: "256Mi"
@@ -40,7 +42,7 @@ spec:
             command:
             - pg_isready
             - -U
-            - axis_user
+            - postgres
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
@@ -48,12 +50,15 @@ spec:
             command:
             - pg_isready
             - -U
-            - axis_user
+            - postgres
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:
       - name: postgres-app-storage
         emptyDir: {}
+      - name: postgres-init-scripts
+        configMap:
+          name: postgres-init-scripts
 ---
 apiVersion: v1
 kind: Service

@@ -79,8 +79,7 @@ public class GoalTypeController {
             description = "Повертає список усіх налаштованих рівнів для поточного користувача"
     )
     @GetMapping
-    public ResponseEntity<Page<GoalTypeResponse>> findAll(
-            @PageableDefault(size = 20, sort = "levelNumber") Pageable pageable) {
+    public ResponseEntity<Page<GoalTypeResponse>> findAll(@PageableDefault(size = 20, sort = "levelNumber") Pageable pageable) {
         log.debug("Finding all goal types for user");
         Page<GoalTypeResponse> response = goalTypeService.findAll(pageable);
         return ResponseEntity.ok(response);

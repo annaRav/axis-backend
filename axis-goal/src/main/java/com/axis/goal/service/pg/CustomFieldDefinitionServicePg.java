@@ -39,14 +39,6 @@ public class CustomFieldDefinitionServicePg implements com.axis.goal.service.Cus
         GoalType goalType = goalTypeRepository.findByIdAndUserId(goalTypeId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("GoalType", goalTypeId));
 
-        // Check if key already exists for this goal type
-        if (definitionRepository.existsByGoalTypeIdAndKey(goalTypeId, request.key())) {
-            throw new BusinessException(
-                    "Custom field with key '" + request.key() + "' already exists for this goal type",
-                    HttpStatus.CONFLICT
-            );
-        }
-
         CustomFieldDefinition definition = definitionMapper.toEntity(request);
         definition.setGoalType(goalType);
 
@@ -68,15 +60,6 @@ public class CustomFieldDefinitionServicePg implements com.axis.goal.service.Cus
         // Verify goal type belongs to user
         if (!definition.getGoalType().getUserId().equals(userId)) {
             throw new BusinessException("You don't have permission to modify this custom field", HttpStatus.FORBIDDEN);
-        }
-
-        // Check if new key conflicts with existing keys (excluding current definition)
-        if (!definition.getKey().equals(request.key()) &&
-                definitionRepository.existsByGoalTypeIdAndKey(definition.getGoalType().getId(), request.key())) {
-            throw new BusinessException(
-                    "Custom field with key '" + request.key() + "' already exists for this goal type",
-                    HttpStatus.CONFLICT
-            );
         }
 
         definitionMapper.updateEntity(request, definition);
@@ -132,11 +115,6 @@ public class CustomFieldDefinitionServicePg implements com.axis.goal.service.Cus
 
         definitionRepository.delete(definition);
         log.info("Deleted custom field definition: {}", id);
-    }
-
-    @Override
-    public boolean existsByGoalTypeIdAndKey(UUID goalTypeId, String key) {
-        return definitionRepository.existsByGoalTypeIdAndKey(goalTypeId, key);
     }
 
     private UUID getCurrentUserId() {

@@ -9,6 +9,8 @@ Axis Backend is a microservices-based life goals planning platform (similar to T
 ### Microservices
 
 - **axis-gateway** (Port 8080): Spring Cloud Gateway, WebFlux-based reactive API gateway with OAuth2 JWT resource server
+- **axis-goal** (Port 8081): Goals management service with PostgreSQL storage for long/medium/short-term goals, goal types, and custom fields
+- **axis-notification** (Port 8082): Notification management service with PostgreSQL storage for notification logs, user settings, and templates
 - **axis-media** (Port 8083): Media file management service with MongoDB storage
 - **axis-common**: Shared library containing security utilities, exception handling, and DTOs
 
@@ -223,11 +225,82 @@ Realm `axis` is auto-imported with:
 Gateway routes requests based on path patterns:
 
 ```yaml
+- Path=/api/goals/**
+  -> http://axis-goal:8081
+
+- Path=/api/goal-types/**
+  -> http://axis-goal:8081
+
+- Path=/api/notifications/**
+  -> http://axis-notification:8082
+
 - Path=/api/media/**
   -> http://axis-media:8083
 ```
 
 All routes require valid JWT authentication except `/actuator/**`.
+
+## Notification Service (axis-notification)
+
+The notification service manages user notifications and notification preferences.
+
+### Entities
+
+1. **NotificationLog**
+   - Tracks all sent notifications
+   - Channels: `EMAIL`, `WS` (WebSocket), `TG` (Telegram)
+   - Status: `SENT`, `READ`, `FAILED`
+   - User-scoped: Each notification belongs to a specific user
+
+2. **NotificationSettings**
+   - User notification preferences
+   - Per-channel enable/disable flags: `enableEmail`, `enablePush`, `enableTelegram`
+   - Default settings: Email and Push enabled, Telegram disabled
+
+3. **NotificationTemplates**
+   - Reusable notification templates
+   - Types: `SMART_GOAL_DEADLINE`, `NEW_MATCH_IN_BACKLOG`, `PROJECT_STARTED`
+   - Contains title and body templates with placeholder support
+
+### API Endpoints
+
+**Notification Logs** (`/api/notifications/logs`):
+- `POST /` - Create notification log
+- `GET /` - List user's notifications (paginated, sorted by createdAt)
+- `GET /{id}` - Get notification by ID
+- `GET /status/{status}` - Filter by status (SENT/READ/FAILED)
+- `GET /channel/{channel}` - Filter by channel (EMAIL/WS/TG)
+- `GET /unread/count` - Count unread notifications
+- `PATCH /{id}/status` - Update status (mark as read/failed)
+- `DELETE /{id}` - Delete specific notification
+- `DELETE /` - Delete all user's notifications
+
+**Notification Settings** (`/api/notifications/settings`):
+- `PUT /` - Create or update user preferences
+- `GET /` - Get user preferences (returns defaults if none exist)
+- `DELETE /` - Delete user preferences (reverts to defaults)
+
+**Notification Templates** (`/api/notifications/templates`):
+- `POST /` - Create template (admin only)
+- `PUT /{id}` - Update template
+- `GET /{id}` - Get template by ID
+- `GET /type/{type}` - Get template by type
+- `GET /` - List all templates (paginated)
+- `DELETE /{id}` - Delete template
+
+### Security
+
+- All endpoints require valid JWT authentication
+- Notification logs and settings are user-scoped (users can only access their own data)
+- Templates are global (all users can read, but only admins should create/update)
+- Uses `SecurityUtils.getCurrentUserIdAsUUID()` for user context
+
+### Database
+
+- Database: `notification` (PostgreSQL)
+- User: `notification_user`
+- Migration: `V1__init_notifications_schema.sql`
+- All tables use UUID primary keys and audit timestamps (`created_at`, `updated_at`)
 
 ## Code Quality Standards
 

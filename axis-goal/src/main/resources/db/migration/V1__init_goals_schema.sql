@@ -13,7 +13,6 @@ CREATE INDEX idx_goal_types_user_id ON goal_types(user_id);
 -- Create custom_field_definitions table
 CREATE TABLE custom_field_definitions (
     id UUID PRIMARY KEY,
-    key VARCHAR(255) NOT NULL,
     label VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL,
     required BOOLEAN NOT NULL,

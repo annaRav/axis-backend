@@ -10,9 +10,6 @@ public record CustomFieldDefinitionResponse(
         @Schema(description = "Unique identifier of the field definition")
         UUID id,
 
-        @Schema(description = "Technical key for the field", example = "budget_limit")
-        String key,
-
         @Schema(description = "Display label for the user", example = "Обмеження бюджету")
         String label,
 

@@ -32,9 +32,4 @@ public interface CustomFieldDefinitionService {
      * Delete a custom field definition
      */
     void delete(UUID id);
-
-    /**
-     * Check if a field key already exists for a goal type
-     */
-    boolean existsByGoalTypeIdAndKey(UUID goalTypeId, String key);
 }
