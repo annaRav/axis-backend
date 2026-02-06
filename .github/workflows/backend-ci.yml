@@ -48,28 +48,41 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Native Docker Images
-        env:
-          SPRING_BOOT_IMAGE_NAME_GATEWAY: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway:${{ github.sha }}
-          SPRING_BOOT_IMAGE_NAME_GOAL: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-goal:${{ github.sha }}
-          SPRING_BOOT_IMAGE_NAME_NOTIFICATION: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-notification:${{ github.sha }}
-          SPRING_BOOT_IMAGE_NAME_MEDIA: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media:${{ github.sha }}
+      - name: Build Native Images
         run: |
-          # Build native images using Spring Boot buildpacks with Docker registry
-          docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          # Build native images locally (without pushing)
+          ./gradlew :axis-gateway:bootBuildImage --imageName=axis-gateway-native:${{ github.sha }}
+          ./gradlew :axis-goal:bootBuildImage --imageName=axis-goal-native:${{ github.sha }}
+          ./gradlew :axis-notification:bootBuildImage --imageName=axis-notification-native:${{ github.sha }}
+          ./gradlew :axis-media:bootBuildImage --imageName=axis-media-native:${{ github.sha }}
 
-          ./gradlew :axis-gateway:bootBuildImage --imageName=$SPRING_BOOT_IMAGE_NAME_GATEWAY --publishImage
-          ./gradlew :axis-goal:bootBuildImage --imageName=$SPRING_BOOT_IMAGE_NAME_GOAL --publishImage
-          ./gradlew :axis-notification:bootBuildImage --imageName=$SPRING_BOOT_IMAGE_NAME_NOTIFICATION --publishImage
-          ./gradlew :axis-media:bootBuildImage --imageName=$SPRING_BOOT_IMAGE_NAME_MEDIA --publishImage
+      - name: Tag and Push Images to GHCR
+        run: |
+          # Login to GHCR
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-          # Tag images as latest
-          docker tag $SPRING_BOOT_IMAGE_NAME_GATEWAY ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway:latest
-          docker tag $SPRING_BOOT_IMAGE_NAME_GOAL ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-goal:latest
-          docker tag $SPRING_BOOT_IMAGE_NAME_NOTIFICATION ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-notification:latest
-          docker tag $SPRING_BOOT_IMAGE_NAME_MEDIA ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media:latest
+          # Tag images for GHCR
+          docker tag axis-gateway-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway:${{ github.sha }}
+          docker tag axis-gateway-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway:latest
 
+          docker tag axis-goal-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-goal:${{ github.sha }}
+          docker tag axis-goal-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-goal:latest
+
+          docker tag axis-notification-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-notification:${{ github.sha }}
+          docker tag axis-notification-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-notification:latest
+
+          docker tag axis-media-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media:${{ github.sha }}
+          docker tag axis-media-native:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media:latest
+
+          # Push all images
+          docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-gateway:latest
+
+          docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-goal:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-goal:latest
+
+          docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-notification:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-notification:latest
+
+          docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/axis-media:latest
