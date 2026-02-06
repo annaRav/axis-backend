@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: axis
+  name: axis-goal
+spec:
+  template:
+    spec:
+      containers:
+      - name: goal
+        image: axis/goal-native:latest

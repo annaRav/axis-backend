@@ -18,10 +18,11 @@ public interface GoalMapper {
 
     /**
      * Convert GoalRequest DTO to Goal entity
-     * Note: userId will be set separately from the authenticated user
+     * Note: userId and type will be set separately by the service layer
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "type", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "parent", ignore = true)
@@ -30,11 +31,12 @@ public interface GoalMapper {
 
     /**
      * Update existing Goal entity from GoalRequest DTO
-     * Note: Preserves id, userId, createdAt, updatedAt
+     * Note: Preserves id, userId, type, createdAt, updatedAt
      * parent and subGoals are managed through separate endpoints
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "type", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "parent", ignore = true)

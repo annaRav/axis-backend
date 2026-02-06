@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
     id 'com.google.cloud.tools.jib'
+    id 'org.graalvm.buildtools.native'
 }
 
 dependencyManagement {
@@ -66,4 +67,23 @@ jib {
             'service': 'goal'
         ]
     }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = 'axis-goal'
+            buildArgs.add('--verbose')
+            buildArgs.add('-H:+ReportExceptionStackTraces')
+        }
+    }
+}
+
+bootBuildImage {
+    imageName = 'axis/goal-native'
+    environment = [
+        'BP_NATIVE_IMAGE': 'true',
+        'BP_JVM_VERSION': '21'
+    ]
+    builder = 'paketobuildpacks/builder-jammy-tiny:latest'
 }

@@ -1,7 +1,6 @@
 package com.axis.goal.model.dto;
 
 import com.axis.goal.model.entity.Goal.GoalStatus;
-import com.axis.goal.model.entity.GoalType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +9,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Schema(description = "Request DTO for creating or updating a goal")
 public record GoalRequest(
@@ -23,9 +23,9 @@ public record GoalRequest(
     @Size(max = 5000, message = "Description must not exceed 5000 characters")
     String description,
 
-    @Schema(description = "Type of the goal", example = "MEDIUM_TERM")
-    @NotNull(message = "Goal type is required")
-    GoalType type,
+    @Schema(description = "ID of the goal type")
+    @NotNull(message = "Goal type ID is required")
+    UUID typeId,
 
     @Schema(description = "Current status of the goal", example = "NOT_STARTED")
     @NotNull(message = "Goal status is required")

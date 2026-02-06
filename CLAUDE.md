@@ -19,6 +19,7 @@ Axis Backend is a microservices-based life goals planning platform (similar to T
 - Java 21 (use modern features: records, pattern matching, sealed classes)
 - Spring Boot 3.4.1
 - Spring Cloud 2024.0.0
+- GraalVM Native Image (for CI/CD production builds)
 - Keycloak 24.0 (realm: `axis`, client: `axis-backend`)
 - PostgreSQL (separate instances for Keycloak and future application data)
 - MongoDB 7
@@ -41,20 +42,53 @@ Axis Backend is a microservices-based life goals planning platform (similar to T
 
 ## Build and Development Commands
 
-### Building
+### Hybrid Build Strategy
+
+The project uses a **hybrid build approach** optimized for both development speed and production performance:
+
+- **Local Development (JVM)**: Fast iteration with Skaffold, quick rebuilds, hot-reload support
+- **CI/CD Production (Native)**: GraalVM native images for faster startup, lower memory, and smaller containers
+
+**Rationale:**
+- Native compilation takes 5-10x longer than JVM builds
+- Local dev benefits from JIT optimization for long-running services
+- Production benefits from instant startup and reduced resource usage
+- Best of both worlds: fast iteration + optimal deployment
+
+### Building (JVM - Local Development)
 
 ```bash
-# Build all services
+# Build all services (JVM)
 ./gradlew clean build
 
-# Build specific service
+# Build specific service (JVM)
 ./gradlew :axis-media:build
 
-# Build Docker images (uses Jib)
+# Build Docker images (uses Jib for JVM-based images)
 ./gradlew jibDockerBuild
 ```
 
+### Building Native Images (CI/CD Production)
+
+```bash
+# Build native executable (local testing only - slow!)
+./gradlew :axis-gateway:nativeCompile
+
+# Build native Docker image using Spring Boot buildpacks (recommended for CI/CD)
+./gradlew :axis-gateway:bootBuildImage
+
+# Build all native images
+./gradlew :axis-gateway:bootBuildImage
+./gradlew :axis-goal:bootBuildImage
+./gradlew :axis-notification:bootBuildImage
+./gradlew :axis-media:bootBuildImage
+```
+
+**Note:** Native builds require GraalVM and take significantly longer (5-10 minutes per service). Use JVM builds for local development and let CI/CD handle native image builds.
+
 ### Local Development with Skaffold
+
+Skaffold uses **Kustomize overlays** to support both JVM and native image deployments with optimized resource configurations.
 
 ```bash
 # Start Minikube (if not running)
@@ -63,14 +97,59 @@ minikube start
 # Point Docker CLI to Minikube's Docker daemon
 eval $(minikube docker-env)
 
-# Deploy and run in development mode (auto-reload on changes)
+# Deploy with JVM images (default, fast builds, hot-reload)
 skaffold dev
 
-# Deploy without watching
+# Deploy JVM images without watching
 skaffold run
+
+# Deploy with native images (slow builds, optimized runtime)
+skaffold run -p native
 
 # Delete deployment
 skaffold delete
+```
+
+### Kustomize Structure
+
+The project uses Kustomize overlays for different deployment scenarios:
+
+```
+k8s/
+├── base/                       # Base manifests (all services and infrastructure)
+│   ├── kustomization.yaml
+│   ├── namespace.yaml
+│   ├── axis-gateway.yaml       # Service deployments
+│   ├── axis-goal.yaml
+│   ├── axis-media.yaml
+│   ├── axis-notification.yaml
+│   ├── infrastructure/         # Keycloak, PostgreSQL, MongoDB, RabbitMQ, Redis
+│   └── config/                 # ConfigMaps and Secrets
+└── overlays/
+    ├── jvm/                    # JVM-optimized (default for local dev)
+    │   └── kustomization.yaml
+    └── native/                 # Native image-optimized (CI/CD)
+        ├── kustomization.yaml
+        ├── *-image.yaml        # Native image names
+        └── *-resources.yaml    # Reduced memory/CPU
+```
+
+**Resource Comparison:**
+
+| Configuration | Memory (req/limit) | Startup (liveness/readiness) | Use Case |
+|--------------|-------------------|------------------------------|----------|
+| **JVM** | 256Mi / 512Mi | 15-45s / 15-30s | Local development, fast iteration |
+| **Native** | 64Mi / 128Mi | 10-15s / 5-10s | Production deployment, resource-constrained |
+
+**Deployment Commands:**
+
+```bash
+# Deploy using Kustomize directly
+kubectl apply -k k8s/overlays/jvm      # JVM images
+kubectl apply -k k8s/overlays/native   # Native images
+
+# Delete using Kustomize
+kubectl delete -k k8s/overlays/jvm
 ```
 
 ### Kubernetes Operations
@@ -194,6 +273,14 @@ Services expect these environment variables (provided via ConfigMaps/Secrets):
 - `KEYCLOAK_JWK_SET_URI`: Defaults to `http://keycloak:8080/realms/axis/protocol/openid-connect/certs`
 
 ## Kubernetes Deployment
+
+### Deployment Strategy
+
+The project uses **Kustomize overlays** to manage different deployment configurations:
+- **JVM overlay** (`k8s/overlays/jvm`): Default for local development with Skaffold
+- **Native overlay** (`k8s/overlays/native`): For production CI/CD with reduced resources
+
+All deployments use the same base manifests (`k8s/base/`) with environment-specific patches applied by Kustomize.
 
 ### Namespace
 

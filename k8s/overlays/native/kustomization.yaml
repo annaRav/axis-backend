@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: ""
+
+resources:
+  - ../../base
+
+# Native image deployments use significantly reduced resources
+# - Memory: 64Mi requests / 128Mi limits (75% reduction)
+# - CPU: 100m requests / 500m limits
+# - Startup: 10s liveness, 5s readiness (native starts in milliseconds)
+
+labels:
+  - pairs:
+      build-type: native
+
+patches:
+  # Update image names to native variants
+  - path: gateway-image.yaml
+  - path: goal-image.yaml
+  - path: media-image.yaml
+  - path: notification-image.yaml
+  # Reduce resources for native images
+  - path: gateway-resources.yaml
+  - path: goal-resources.yaml
+  - path: media-resources.yaml
+  - path: notification-resources.yaml

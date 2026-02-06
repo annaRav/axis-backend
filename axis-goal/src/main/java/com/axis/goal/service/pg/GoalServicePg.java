@@ -12,6 +12,7 @@ import com.axis.goal.model.entity.Goal.GoalStatus;
 import com.axis.goal.model.entity.GoalType;
 import com.axis.goal.repository.CustomFieldDefinitionRepository;
 import com.axis.goal.repository.GoalRepository;
+import com.axis.goal.repository.GoalTypeRepository;
 import com.axis.goal.service.GoalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class GoalServicePg implements GoalService {
     private final GoalRepository goalRepository;
     private final GoalMapper goalMapper;
     private final CustomFieldDefinitionRepository fieldDefinitionRepository;
+    private final GoalTypeRepository goalTypeRepository;
 
     @Override
     @Transactional
@@ -39,8 +41,13 @@ public class GoalServicePg implements GoalService {
         UUID userId = getCurrentUserId();
         log.debug("Creating new goal for user: {}", userId);
 
+        // Fetch and validate the GoalType
+        GoalType goalType = goalTypeRepository.findByIdAndUserId(request.typeId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("GoalType", request.typeId()));
+
         Goal goal = goalMapper.toEntity(request);
         goal.setUserId(userId);
+        goal.setType(goalType);
 
         setupCustomFieldAnswers(goal);
 
@@ -59,7 +66,12 @@ public class GoalServicePg implements GoalService {
         Goal goal = goalRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Goal", id));
 
+        // Fetch and validate the GoalType if it's being updated
+        GoalType goalType = goalTypeRepository.findByIdAndUserId(request.typeId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("GoalType", request.typeId()));
+
         goalMapper.updateEntity(request, goal);
+        goal.setType(goalType);
         setupCustomFieldAnswers(goal);
 
         log.info("Updated goal: {} for user: {}", id, userId);

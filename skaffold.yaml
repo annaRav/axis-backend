@@ -30,21 +30,9 @@ build:
     useBuildkit: true
 
 deploy:
-  kubectl:
-    manifests:
-      - k8s/namespace.yaml
-      - k8s/config/configmaps.yaml
-      - k8s/config/secrets.yaml
-      - k8s/infrastructure/postgres-app.yaml
-      - k8s/infrastructure/keycloak.yaml
-      - k8s/infrastructure/mongodb.yaml
-      - k8s/infrastructure/rabbitmq.yaml
-      - k8s/infrastructure/redis.yaml
-      - k8s/infrastructure/keycloak-realm-config.yaml
-      - k8s/services/axis-gateway.yaml
-      - k8s/services/axis-goal.yaml
-      - k8s/services/axis-media.yaml
-      - k8s/services/axis-notification.yaml
+  kustomize:
+    paths:
+      - k8s/overlays/jvm
 
 portForward:
   - resourceType: service
@@ -108,3 +96,27 @@ profiles:
             project: axis-notification
             type: gradle
             args: ["--no-daemon"]
+
+  - name: native
+    build:
+      artifacts:
+        - image: axis/gateway-native
+          context: .
+          custom:
+            buildCommand: ./gradlew :axis-gateway:bootBuildImage --imageName=axis/gateway-native
+        - image: axis/goal-native
+          context: .
+          custom:
+            buildCommand: ./gradlew :axis-goal:bootBuildImage --imageName=axis/goal-native
+        - image: axis/media-native
+          context: .
+          custom:
+            buildCommand: ./gradlew :axis-media:bootBuildImage --imageName=axis/media-native
+        - image: axis/notification-native
+          context: .
+          custom:
+            buildCommand: ./gradlew :axis-notification:bootBuildImage --imageName=axis/notification-native
+    deploy:
+      kustomize:
+        paths:
+          - k8s/overlays/native
