@@ -12,6 +12,13 @@ dependencyManagement {
     }
 }
 
+configurations {
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+        exclude group: 'org.apache.tomcat'
+    }
+}
+
 dependencies {
     implementation project(':axis-common')
 
@@ -24,9 +31,15 @@ dependencies {
     // Explicitly add WebFlux for Netty
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    // Security (exclude web/tomcat to force reactive)
+    implementation('org.springframework.boot:spring-boot-starter-security') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-oauth2-resource-server') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
 
     // Actuator (exclude Tomcat)
     implementation('org.springframework.boot:spring-boot-starter-actuator') {
