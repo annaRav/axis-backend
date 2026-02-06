@@ -35,6 +35,9 @@ jobs:
         run: |
           echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_ENV}
 
+      - name: Clean build artifacts
+        run: ./gradlew clean
+
       - name: Build and Test with Gradle
         run: ./gradlew build -x test
 
@@ -50,11 +53,11 @@ jobs:
 
       - name: Build Native Images
         run: |
-          # Build native images locally (without pushing)
-          ./gradlew :axis-gateway:bootBuildImage --imageName=axis-gateway-native:${{ github.sha }}
-          ./gradlew :axis-goal:bootBuildImage --imageName=axis-goal-native:${{ github.sha }}
-          ./gradlew :axis-notification:bootBuildImage --imageName=axis-notification-native:${{ github.sha }}
-          ./gradlew :axis-media:bootBuildImage --imageName=axis-media-native:${{ github.sha }}
+          # Build native images with clean cache (no Docker layer caching)
+          ./gradlew :axis-gateway:bootBuildImage --imageName=axis-gateway-native:${{ github.sha }} --cleanCache
+          ./gradlew :axis-goal:bootBuildImage --imageName=axis-goal-native:${{ github.sha }} --cleanCache
+          ./gradlew :axis-notification:bootBuildImage --imageName=axis-notification-native:${{ github.sha }} --cleanCache
+          ./gradlew :axis-media:bootBuildImage --imageName=axis-media-native:${{ github.sha }} --cleanCache
 
       - name: Tag and Push Images to GHCR
         run: |
