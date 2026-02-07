@@ -78,13 +78,8 @@ graalvmNative {
     }
 }
 
-// Disable Spring AOT processing (not needed for native image via buildpacks)
-tasks.named('processAot') {
-    enabled = false
-}
-tasks.named('processTestAot') {
-    enabled = false
-}
+// Spring AOT processing is REQUIRED for native images
+// AOT generates ahead-of-time metadata for reflection, serialization, etc.
 
 bootBuildImage {
     imageName = 'axis/notification-native'

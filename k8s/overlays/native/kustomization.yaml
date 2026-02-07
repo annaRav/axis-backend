@@ -26,3 +26,5 @@ patches:
   - path: goal-resources.yaml
   - path: media-resources.yaml
   - path: notification-resources.yaml
+  # Always pull fresh images from registry (no cache)
+  - path: imagepullpolicy.yaml
