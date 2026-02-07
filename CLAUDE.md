@@ -214,11 +214,12 @@ Global exception handling is provided in axis-common:
 
 ### Database Migrations
 
-Flyway is used for database migrations:
-- Location: `src/main/resources/db/migration/`
-- Naming: `V{version}__{description}.sql` (e.g., `V1__init_schema.sql`)
+Liquibase is used for database migrations:
+- Location: `src/main/resources/db/changelog/`
+- Format: YAML-based changelogs (e.g., `db.changelog-master.yaml`)
 - JPA configuration: `ddl-auto: validate` to prevent schema auto-generation
 - Run migrations: Automatic on application startup
+- Liquibase provides better support for complex migrations and rollbacks
 
 ### Shared Library (axis-common)
 
@@ -247,9 +248,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate  # ALWAYS use validate
-  flyway:
+  liquibase:
     enabled: true
-    baseline-on-migrate: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: public  # Each service has separate database
   security:
     oauth2:
       resourceserver:

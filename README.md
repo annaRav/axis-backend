@@ -92,7 +92,7 @@ axis-backend/
 
 ## Database Migrations
 
-Future Flyway migrations will be located in service-specific `src/main/resources/db/migration/` directories.
+Liquibase is used for database migrations. Changelogs are located in service-specific `src/main/resources/db/changelog/` directories using YAML format for better readability and version control.
 
 ## Building
 

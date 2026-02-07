@@ -117,7 +117,7 @@ Goals management service.
 **Planned Technology:**
 - Spring Boot Web (MVC)
 - Spring Data JPA + PostgreSQL
-- Flyway migrations
+- Liquibase migrations
 - Spring Security OAuth2 Resource Server
 
 ---

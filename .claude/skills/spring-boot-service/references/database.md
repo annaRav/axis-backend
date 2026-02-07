@@ -31,7 +31,7 @@ spring:
         order_inserts: true
         order_updates: true
 
-  flyway:
+  liquibase:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
@@ -40,7 +40,7 @@ spring:
 
 **Important:**
 - Always use `ddl-auto: validate` to prevent schema auto-generation
-- Flyway handles all schema changes via migration scripts
+- Liquibase handles all schema changes via migration scripts
 - HikariCP is configured for connection pooling
 
 ### Entity Example

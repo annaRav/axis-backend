@@ -64,7 +64,7 @@ Axis Platform is a microservices-based life goals planning system (similar to Tr
 - Audit logs
 - Configuration
 - **Note:** All entities use UUID primary keys
-- **Migrations:** Flyway in `src/main/resources/db/migration/`
+- **Migrations:** Liquibase in `src/main/resources/db/migration/`
 - **JPA mode:** `ddl-auto: validate` (never auto-generate schema)
 
 **MongoDB** (flexible, document data):
