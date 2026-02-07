@@ -98,6 +98,8 @@ bootBuildImage {
     environment = [
         'BP_NATIVE_IMAGE': 'true',
         'BP_JVM_VERSION': '21',
+        // CRITICAL: Force Netty (not Tomcat) for reactive Gateway
+        'BP_WEB_SERVER': 'netty',
         // Force Netty server for reactive Gateway
         'BP_NATIVE_IMAGE_BUILD_ARGUMENTS': '--initialize-at-build-time=reactor.netty,io.netty'
     ]
