@@ -35,23 +35,14 @@ jobs:
         run: |
           echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_ENV}
 
-      - name: Clean build artifacts
-        run: ./gradlew clean
-
-      - name: Build and Test with Gradle (JVM)
-        run: ./gradlew build -x test
-
-      - name: Clean before native build
-        run: ./gradlew clean
-
       - name: Build native executable (axis-goal)
-        run: ./gradlew :axis-goal:build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
+        run: ./gradlew :axis-goal:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
 
       - name: Build native executable (axis-notification)
-        run: ./gradlew :axis-notification:build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
+        run: ./gradlew :axis-notification:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
 
       - name: Build native executable (axis-media)
-        run: ./gradlew :axis-media:build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
+        run: ./gradlew :axis-media:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
