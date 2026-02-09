@@ -36,13 +36,13 @@ jobs:
           echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Build native executable (axis-goal)
-        run: ./gradlew :axis-goal:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.package.jar.enabled=false
+        run: ./gradlew :axis-goal:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.package.jar.enabled=false -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.1-java21
 
       - name: Build native executable (axis-notification)
-        run: ./gradlew :axis-notification:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.package.jar.enabled=false
+        run: ./gradlew :axis-notification:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.package.jar.enabled=false -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.1-java21
 
       - name: Build native executable (axis-media)
-        run: ./gradlew :axis-media:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.package.jar.enabled=false
+        run: ./gradlew :axis-media:quarkusBuild -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.package.jar.enabled=false -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.1-java21
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
