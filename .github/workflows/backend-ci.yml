@@ -41,6 +41,9 @@ jobs:
       - name: Build and Test with Gradle (JVM)
         run: ./gradlew build -x test
 
+      - name: Clean before native build
+        run: ./gradlew clean
+
       - name: Build native executable (axis-goal)
         run: ./gradlew :axis-goal:build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
 
