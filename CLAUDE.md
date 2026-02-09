@@ -57,14 +57,7 @@ All services use these core extensions:
 
 ## Build and Development Commands
 
-### Two-Mode Development Strategy
-
-The project uses exactly **2 modes** via a single `skaffold.yaml`:
-
-- **Dev** (`skaffold dev`): Builds JVM images locally in Minikube, deploys everything (infra + services), Skaffold rebuilds on file changes
-- **Prod** (`skaffold run -p prod`): Pulls native images from GitHub Container Registry (ghcr.io), no local builds
-
-### Local Development (Recommended)
+### Local Development
 
 ```bash
 # Start Minikube (if not running)
@@ -87,20 +80,6 @@ Skaffold will build 3 JVM Docker images, deploy all infrastructure (PostgreSQL, 
 - MongoDB: localhost:27017
 - Redis: localhost:6379
 
-### Testing Production Images
-
-Pull and test production-ready native images from GitHub Container Registry:
-
-```bash
-# Deploy native images from GHCR (no local builds)
-skaffold run -p prod
-
-# Delete deployment
-skaffold delete -p prod
-```
-
-This pulls pre-built images from `ghcr.io/annarav/axis-*:latest` - no local compilation needed!
-
 ### Building Native Images (CI/CD Only)
 
 **IMPORTANT:** Native images are built automatically in GitHub Actions. Do NOT build them locally unless debugging native compilation issues.
@@ -110,49 +89,30 @@ This pulls pre-built images from `ghcr.io/annarav/axis-*:latest` - no local comp
 ./gradlew :axis-goal:build -Dquarkus.package.type=native -Dquarkus.native.container-build=true
 ```
 
-### Kustomize Structure
+### Kubernetes Manifests
 
-The project uses a **simplified Kustomize structure** with 2 overlays:
+Flat `k8s/` directory — no Kustomize, no overlays. Skaffold deploys via `kubectl` directly. CI/CD builds native images separately.
 
 ```
 k8s/
-├── base/                       # Base manifests (all services and infrastructure)
-│   ├── kustomization.yaml
-│   ├── namespace.yaml
-│   ├── gateway-api.yaml        # Nginx Ingress routing
-│   ├── axis-goal.yaml
-│   ├── axis-media.yaml
-│   ├── axis-notification.yaml
-│   ├── infrastructure/         # Keycloak, PostgreSQL, MongoDB, RabbitMQ, Redis
-│   └── config/                 # ConfigMaps and Secrets
-└── overlays/
-    ├── dev/                    # For local development (adds env label only)
-    │   └── kustomization.yaml
-    └── prod/                   # For production (GHCR images + native resources)
-        ├── kustomization.yaml
-        └── prod-patches.yaml   # Native resources (low memory/fast startup)
+├── namespace.yaml
+├── gateway-api.yaml          # Nginx Ingress routing
+├── axis-goal.yaml
+├── axis-media.yaml
+├── axis-notification.yaml
+├── config/                   # ConfigMaps and Secrets
+│   ├── configmaps.yaml
+│   └── secrets.yaml
+└── infrastructure/           # Keycloak, PostgreSQL, MongoDB, RabbitMQ, Redis
+    ├── postgres-app.yaml
+    ├── keycloak.yaml
+    ├── mongodb.yaml
+    ├── rabbitmq.yaml
+    ├── redis.yaml
+    └── keycloak-realm-config.yaml
 ```
 
-**Resource Comparison:**
-
-| Configuration | Memory (req/limit) | Startup (liveness/readiness) | Use Case |
-|--------------|-------------------|------------------------------|----------|
-| **Dev (JVM)** | 256Mi / 512Mi | 45s / 30s | Local development with JVM images |
-| **Prod (Native)** | 64Mi / 128Mi | 15s / 10s | Production from GitHub Container Registry |
-
-**Deployment Commands:**
-
-```bash
-# Dev: build JVM images locally, deploy everything
-skaffold dev
-
-# Prod: pull native images from GHCR, deploy everything
-skaffold run -p prod
-
-# Delete deployment
-skaffold delete          # dev
-skaffold delete -p prod  # prod
-```
+JVM resource settings (256Mi/512Mi memory, 45s/30s startup probes) are baked into the manifests. All manifests have `namespace: axis` set explicitly.
 
 ### Kubernetes Operations
 
@@ -327,11 +287,7 @@ Services expect these environment variables (provided via ConfigMaps/Secrets):
 
 ### Deployment Strategy
 
-The project uses **simplified Kustomize overlays** with 2 configurations:
-- **Dev overlay** (`k8s/overlays/dev`): Uses base manifests with JVM resource settings (no patches needed)
-- **Prod overlay** (`k8s/overlays/prod`): Native images from GitHub Container Registry with reduced resource limits
-
-All deployments use the same base manifests (`k8s/base/`). Dev overlay adds only an environment label. Prod overlay applies resource patches and swaps images to ghcr.io.
+Local development uses `skaffold dev` which builds JVM images in Minikube and deploys via Kustomize from `k8s/`. Native images are built in CI (GitHub Actions) and pushed to GHCR — no production deployment from the local machine.
 
 ### Namespace
 

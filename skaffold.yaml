@@ -30,9 +30,9 @@ build:
     push: false
 
 deploy:
-  kustomize:
-    paths:
-      - k8s/overlays/dev
+  kubectl:
+    manifests:
+      - k8s/**
 
 portForward:
   - resourceType: service
@@ -65,12 +65,3 @@ portForward:
     namespace: axis
     port: 6379
     localPort: 6379
-
-profiles:
-  - name: prod
-    build:
-      artifacts: []
-    deploy:
-      kustomize:
-        paths:
-          - k8s/overlays/prod
