@@ -32,7 +32,10 @@ build:
 deploy:
   kubectl:
     manifests:
-      - k8s/**
+      - k8s/namespace.yaml
+      - k8s/config/**
+      - k8s/infrastructure/**
+      - k8s/*.yaml
 
 portForward:
   - resourceType: service
