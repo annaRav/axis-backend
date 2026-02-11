@@ -78,6 +78,21 @@ public class GoalTypeServicePg implements GoalTypeService {
     }
 
     @Override
+    @Transactional
+    public GoalTypeResponse patch(UUID id, GoalTypeRequest request) {
+        UUID userId = getCurrentUserId();
+        log.debug("Patching goal type: {} for user: {}", id, userId);
+
+        GoalType existingType = goalTypeRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("GoalType", id));
+
+        goalTypeMapper.patchEntity(request, existingType);
+
+        log.info("Goal type patched: {} for user: {}", id, userId);
+        return goalTypeMapper.toResponse(existingType);
+    }
+
+    @Override
     public GoalTypeResponse findById(UUID id) {
         UUID userId = getCurrentUserId();
         log.debug("Finding goal type: {} for user: {}", id, userId);

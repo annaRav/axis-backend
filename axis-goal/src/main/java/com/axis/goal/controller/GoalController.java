@@ -67,6 +67,23 @@ public class GoalController {
     }
 
     @Operation(
+            summary = "Partially update goal",
+            description = "Updates only the provided fields (partial update - null fields are ignored)"
+    )
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Goal successfully patched"),
+            @APIResponse(responseCode = "404", description = "Goal not found")
+    })
+    @PATCH
+    @Path("/{id}")
+    public GoalResponse patch(
+            @Parameter(description = "Goal ID") @PathParam("id") UUID id,
+            @Valid GoalRequest request) {
+        log.debug("Patching goal: {}", id);
+        return goalService.patch(id, request);
+    }
+
+    @Operation(
         summary = "Get goal by ID",
         description = "Retrieves a specific goal by its ID. Only the owner can view their goals."
     )

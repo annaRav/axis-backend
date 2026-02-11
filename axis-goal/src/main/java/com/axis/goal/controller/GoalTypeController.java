@@ -46,11 +46,9 @@ public class GoalTypeController {
         return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
-
-    //todo redo with patch
     @Operation(
             summary = "Update goal type",
-            description = "Updates the title or custom field schema"
+            description = "Updates the title or custom field schema (full update - all fields required)"
     )
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "Goal type successfully updated"),
@@ -58,11 +56,24 @@ public class GoalTypeController {
     })
     @PUT
     @Path("/{id}")
-    public GoalTypeResponse update(
-            @Parameter(description = "Goal type ID") @PathParam("id") UUID id,
-            @Valid GoalTypeRequest request) {
+    public GoalTypeResponse update(@Parameter(description = "Goal type ID") @PathParam("id") UUID id, @Valid GoalTypeRequest request) {
         log.debug("Updating goal type: {}", id);
         return goalTypeService.update(id, request);
+    }
+
+    @Operation(
+            summary = "Partially update goal type",
+            description = "Updates only the provided fields (partial update - null fields are ignored)"
+    )
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Goal type successfully patched"),
+            @APIResponse(responseCode = "404", description = "Goal type not found")
+    })
+    @PATCH
+    @Path("/{id}")
+    public GoalTypeResponse patch(@Parameter(description = "Goal type ID") @PathParam("id") UUID id, GoalTypeRequest request) {
+        log.debug("Patching goal type: {}", id);
+        return goalTypeService.patch(id, request);
     }
 
     @Operation(

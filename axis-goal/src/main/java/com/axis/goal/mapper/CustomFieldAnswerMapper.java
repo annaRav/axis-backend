@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
+
 @Mapper(componentModel = "cdi")
 public interface CustomFieldAnswerMapper {
 
@@ -29,11 +31,23 @@ public interface CustomFieldAnswerMapper {
     CustomFieldAnswer toEntity(CustomFieldAnswerRequest request);
 
     /**
-     * Update existing CustomFieldAnswer entity from CustomFieldAnswerRequest DTO
+     * Update existing CustomFieldAnswer entity from CustomFieldAnswerRequest DTO (PUT - full update)
      * Note: Preserves id, fieldDefinition, and goal
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "fieldDefinition", ignore = true)
     @Mapping(target = "goal", ignore = true)
     void updateEntity(CustomFieldAnswerRequest request, @MappingTarget CustomFieldAnswer answer);
+
+    /**
+     * Partially update existing CustomFieldAnswer entity from CustomFieldAnswerRequest DTO (PATCH - partial update)
+     * Only non-null fields in the request will be updated
+     * Note: Preserves id, fieldDefinition, and goal. fieldDefinitionId changes are ignored.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fieldDefinition", ignore = true)
+    @Mapping(target = "goal", ignore = true)
+    @Mapping(target = "fieldDefinitionId", ignore = true)
+    @Mapping(target = "value", nullValuePropertyMappingStrategy = IGNORE)
+    void patchEntity(CustomFieldAnswerRequest request, @MappingTarget CustomFieldAnswer answer);
 }

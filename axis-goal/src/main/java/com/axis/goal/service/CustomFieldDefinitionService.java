@@ -2,6 +2,9 @@ package com.axis.goal.service;
 
 import com.axis.goal.model.dto.CustomFieldDefinitionRequest;
 import com.axis.goal.model.dto.CustomFieldDefinitionResponse;
+import com.axis.goal.model.dto.GoalTypeRequest;
+import com.axis.goal.model.dto.GoalTypeResponse;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +20,11 @@ public interface CustomFieldDefinitionService {
      * Update an existing custom field definition
      */
     CustomFieldDefinitionResponse update(UUID id, CustomFieldDefinitionRequest request);
+
+    /**
+     * Partially update an existing custom field definition (only non-null fields)
+     */
+    CustomFieldDefinitionResponse patch(UUID id, CustomFieldDefinitionRequest request);
 
     /**
      * Find a custom field definition by ID

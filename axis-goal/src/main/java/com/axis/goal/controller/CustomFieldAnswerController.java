@@ -52,7 +52,7 @@ public class CustomFieldAnswerController {
 
     @Operation(
             summary = "Update a custom field answer",
-            description = "Updates an existing custom field answer. Only the owner can update."
+            description = "Updates an existing custom field answer (full update - all fields required). Only the owner can update."
     )
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "Custom field answer updated successfully"),
@@ -69,6 +69,27 @@ public class CustomFieldAnswerController {
             @Valid CustomFieldAnswerRequest request) {
         log.debug("Updating custom field answer: {}", id);
         return answerService.update(id, request);
+    }
+
+    @Operation(
+            summary = "Partially update a custom field answer",
+            description = "Updates only the provided fields (partial update - null fields are ignored). Only the owner can update."
+    )
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Custom field answer patched successfully"),
+            @APIResponse(responseCode = "400", description = "Invalid request data"),
+            @APIResponse(responseCode = "401", description = "User not authenticated"),
+            @APIResponse(responseCode = "403", description = "User doesn't have permission"),
+            @APIResponse(responseCode = "404", description = "Custom field answer not found")
+    })
+    @PATCH
+    @Path("/{id}")
+    public CustomFieldAnswerResponse patch(
+            @Parameter(description = "Goal ID") @PathParam("goalId") UUID goalId,
+            @Parameter(description = "Custom Field Answer ID") @PathParam("id") UUID id,
+            CustomFieldAnswerRequest request) {
+        log.debug("Patching custom field answer: {}", id);
+        return answerService.patch(id, request);
     }
 
     @Operation(

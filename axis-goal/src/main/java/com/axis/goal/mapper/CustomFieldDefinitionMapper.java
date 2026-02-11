@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
+
 @Mapper(componentModel = "cdi")
 public interface CustomFieldDefinitionMapper {
 
@@ -30,4 +32,16 @@ public interface CustomFieldDefinitionMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "goalType", ignore = true)
     void updateEntity(CustomFieldDefinitionRequest request, @MappingTarget CustomFieldDefinition definition);
+
+    /**
+     * Partially updates existing CustomFieldDefinition entity from Request DTO (PATCH - partial update)
+     * Only non-null fields in the request will be updated
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "goalType", ignore = true)
+    @Mapping(target = "label", nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "type", nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "required", nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "placeholder", nullValuePropertyMappingStrategy = IGNORE)
+    void patchEntity(CustomFieldDefinitionRequest request, @MappingTarget CustomFieldDefinition definition);
 }

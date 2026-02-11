@@ -119,6 +119,35 @@ public class CustomFieldAnswerServicePg implements com.axis.goal.service.CustomF
     }
 
     @Override
+    @Transactional
+    public CustomFieldAnswerResponse patch(UUID id, CustomFieldAnswerRequest request) {
+        UUID userId = getCurrentUserId();
+        log.debug("Patching custom field answer: {} by user: {}", id, userId);
+
+        CustomFieldAnswer answer = answerRepository.findByIdOptional(id)
+                .orElseThrow(() -> new ResourceNotFoundException("CustomFieldAnswer", id));
+
+        // Verify goal belongs to user
+        if (!answer.getGoal().getUserId().equals(userId)) {
+            throw new BusinessException("You don't have permission to modify this answer", Response.Status.FORBIDDEN);
+        }
+
+        // Validate required fields only if value is being updated
+        if (request.value() != null && answer.getFieldDefinition().isRequired() && request.value().isBlank()) {
+            throw new BusinessException(
+                    "Value cannot be empty for required field: " + answer.getFieldDefinition().getLabel(),
+                    Response.Status.BAD_REQUEST
+            );
+        }
+
+        // Use mapper for partial update (only non-null fields)
+        answerMapper.patchEntity(request, answer);
+
+        log.info("Patched custom field answer: {}", id);
+        return answerMapper.toResponse(answer);
+    }
+
+    @Override
     public CustomFieldAnswerResponse findById(UUID id) {
         UUID userId = getCurrentUserId();
         log.debug("Finding custom field answer: {} by user: {}", id, userId);

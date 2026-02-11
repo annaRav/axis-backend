@@ -4,9 +4,7 @@ import com.axis.common.exception.BusinessException;
 import com.axis.common.exception.ResourceNotFoundException;
 import com.axis.common.security.SecurityUtils;
 import com.axis.goal.mapper.GoalMapper;
-import com.axis.goal.model.dto.GoalRequest;
-import com.axis.goal.model.dto.GoalResponse;
-import com.axis.goal.model.dto.PageResponse;
+import com.axis.goal.model.dto.*;
 import com.axis.goal.model.entity.CustomFieldDefinition;
 import com.axis.goal.model.entity.Goal;
 import com.axis.goal.model.entity.Goal.GoalStatus;
@@ -86,6 +84,21 @@ public class GoalServicePg implements GoalService {
 
         log.info("Updated goal: {} for user: {}", id, userId);
         return goalMapper.toResponse(goal);
+    }
+
+    @Override
+    @Transactional
+    public GoalResponse patch(UUID id, GoalRequest request) {
+        UUID userId = getCurrentUserId();
+        log.debug("Patching goal: {} for user: {}", id, userId);
+
+        Goal existingGoal = goalRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Goal", id));
+
+        goalMapper.patchEntity(request, existingGoal);
+
+        log.info("Goal patched: {} for user: {}", id, userId);
+        return goalMapper.toResponse(existingGoal);
     }
 
     @Override

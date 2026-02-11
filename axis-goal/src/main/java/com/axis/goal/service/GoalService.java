@@ -20,6 +20,10 @@ public interface GoalService {
     GoalResponse update(UUID id, GoalRequest request);
 
     /**
+     * Partially update an existing goal configuration (only non-null fields)
+     */
+    GoalResponse patch(UUID id, GoalRequest request);
+    /**
      * Find a goal by ID (only returns if it belongs to the authenticated user)
      */
     GoalResponse findById(UUID id);

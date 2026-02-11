@@ -60,7 +60,6 @@ public class CustomFieldDefinitionController {
             @APIResponse(responseCode = "401", description = "User not authenticated"),
             @APIResponse(responseCode = "403", description = "User doesn't have permission"),
             @APIResponse(responseCode = "404", description = "Custom field definition not found"),
-            @APIResponse(responseCode = "409", description = "Custom field key already exists")
     })
     @PUT
     @Path("/{id}")
@@ -70,6 +69,23 @@ public class CustomFieldDefinitionController {
             @Valid CustomFieldDefinitionRequest request) {
         log.debug("Updating custom field definition: {}", id);
         return definitionService.update(id, request);
+    }
+
+    @Operation(
+            summary = "Partially update goal",
+            description = "Updates only the provided fields (partial update - null fields are ignored)"
+    )
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Custom field definition successfully patched"),
+            @APIResponse(responseCode = "404", description = "Custom field definition not found")
+    })
+    @PATCH
+    @Path("/{id}")
+    public CustomFieldDefinitionResponse patch(
+            @Parameter(description = "Custom field definition ID") @PathParam("id") UUID id,
+            @Valid CustomFieldDefinitionRequest request) {
+        log.debug("Patching custom field definition: {}", id);
+        return definitionService.patch(id, request);
     }
 
     @Operation(

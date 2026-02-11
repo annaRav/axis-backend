@@ -10,6 +10,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
+
 @Mapper(componentModel = "cdi")
 public interface GoalTypeMapper {
 
@@ -29,13 +31,26 @@ public interface GoalTypeMapper {
     GoalType toEntity(GoalTypeRequest request);
 
     /**
-     * Updates existing GoalType entity from Request DTO
+     * Updates existing GoalType entity from Request DTO (PUT - full update)
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "levelNumber", ignore = true)
     @Mapping(target = "goals", ignore = true)
+    @Mapping(target = "customFields", ignore = true)
     void updateEntity(GoalTypeRequest request, @MappingTarget GoalType goalType);
+
+    /**
+     * Partially updates existing GoalType entity from Request DTO (PATCH - partial update)
+     * Only non-null fields in the request will be updated
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "levelNumber", ignore = true)
+    @Mapping(target = "goals", ignore = true)
+    @Mapping(target = "customFields", ignore = true)
+    @Mapping(target = "title", nullValuePropertyMappingStrategy = IGNORE)
+    void patchEntity(GoalTypeRequest request, @MappingTarget GoalType goalType);
 
     /**
      * Mapping for custom field definitions (used automatically by MapStruct for lists)

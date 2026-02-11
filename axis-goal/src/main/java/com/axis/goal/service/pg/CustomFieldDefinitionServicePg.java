@@ -6,6 +6,8 @@ import com.axis.common.security.SecurityUtils;
 import com.axis.goal.mapper.CustomFieldDefinitionMapper;
 import com.axis.goal.model.dto.CustomFieldDefinitionRequest;
 import com.axis.goal.model.dto.CustomFieldDefinitionResponse;
+import com.axis.goal.model.dto.GoalTypeRequest;
+import com.axis.goal.model.dto.GoalTypeResponse;
 import com.axis.goal.model.entity.CustomFieldDefinition;
 import com.axis.goal.model.entity.GoalType;
 import com.axis.goal.repository.CustomFieldDefinitionRepository;
@@ -60,6 +62,26 @@ public class CustomFieldDefinitionServicePg implements CustomFieldDefinitionServ
     public CustomFieldDefinitionResponse update(UUID id, CustomFieldDefinitionRequest request) {
         UUID userId = getCurrentUserId();
         log.debug("Updating custom field definition: {} by user: {}", id, userId);
+
+        CustomFieldDefinition definition = definitionRepository.findByIdOptional(id)
+                .orElseThrow(() -> new ResourceNotFoundException("CustomFieldDefinition", id));
+
+        // Verify goal type belongs to user
+        if (!definition.getGoalType().getUserId().equals(userId)) {
+            throw new BusinessException("You don't have permission to modify this custom field", Response.Status.FORBIDDEN);
+        }
+
+        definitionMapper.updateEntity(request, definition);
+
+        log.info("Updated custom field definition: {}", id);
+        return definitionMapper.toResponse(definition);
+    }
+
+    @Override
+    @Transactional
+    public CustomFieldDefinitionResponse patch(UUID id, CustomFieldDefinitionRequest request) {
+        UUID userId = getCurrentUserId();
+        log.debug("Patching custom field definition: {} by user: {}", id, userId);
 
         CustomFieldDefinition definition = definitionRepository.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("CustomFieldDefinition", id));

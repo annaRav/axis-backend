@@ -14,9 +14,14 @@ public interface CustomFieldAnswerService {
     CustomFieldAnswerResponse create(UUID goalId, CustomFieldAnswerRequest request);
 
     /**
-     * Update an existing custom field answer
+     * Update an existing custom field answer (full update)
      */
     CustomFieldAnswerResponse update(UUID id, CustomFieldAnswerRequest request);
+
+    /**
+     * Partially update an existing custom field answer (only non-null fields)
+     */
+    CustomFieldAnswerResponse patch(UUID id, CustomFieldAnswerRequest request);
 
     /**
      * Find a custom field answer by ID

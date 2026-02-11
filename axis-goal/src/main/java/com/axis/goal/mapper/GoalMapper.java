@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
+
 @Mapper(componentModel = "cdi", uses = {CustomFieldAnswerMapper.class})
 public interface GoalMapper {
 
@@ -42,4 +44,20 @@ public interface GoalMapper {
     @Mapping(target = "parent", ignore = true)
     @Mapping(target = "subGoals", ignore = true)
     void updateEntity(GoalRequest request, @MappingTarget Goal goal);
+
+    /**
+     * Partially updates existing Goal entity from Request DTO (PATCH - partial update)
+     * Only non-null fields in the request will be updated
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "type", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "parent", ignore = true)
+    @Mapping(target = "subGoals", ignore = true)
+    @Mapping(target = "title", nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "description", nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "status", nullValuePropertyMappingStrategy = IGNORE)
+    void patchEntity(GoalRequest request, @MappingTarget Goal goal);
 }
