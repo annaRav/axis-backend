@@ -47,21 +47,6 @@ public class GoalTypeController {
     }
 
     @Operation(
-            summary = "Update goal type",
-            description = "Updates the title or custom field schema (full update - all fields required)"
-    )
-    @APIResponses(value = {
-            @APIResponse(responseCode = "200", description = "Goal type successfully updated"),
-            @APIResponse(responseCode = "404", description = "Goal type not found")
-    })
-    @PUT
-    @Path("/{id}")
-    public GoalTypeResponse update(@Parameter(description = "Goal type ID") @PathParam("id") UUID id, @Valid GoalTypeRequest request) {
-        log.debug("Updating goal type: {}", id);
-        return goalTypeService.update(id, request);
-    }
-
-    @Operation(
             summary = "Partially update goal type",
             description = "Updates only the provided fields (partial update - null fields are ignored)"
     )

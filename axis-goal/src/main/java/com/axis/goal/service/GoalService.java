@@ -15,11 +15,6 @@ public interface GoalService {
     GoalResponse create(GoalRequest request);
 
     /**
-     * Update an existing goal
-     */
-    GoalResponse update(UUID id, GoalRequest request);
-
-    /**
      * Partially update an existing goal configuration (only non-null fields)
      */
     GoalResponse patch(UUID id, GoalRequest request);

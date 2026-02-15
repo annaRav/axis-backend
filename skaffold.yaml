@@ -63,3 +63,8 @@ portForward:
     namespace: axis
     port: 6379
     localPort: 6379
+  - resourceType: service
+    resourceName: prometheus
+    namespace: axis
+    port: 9090
+    localPort: 9090

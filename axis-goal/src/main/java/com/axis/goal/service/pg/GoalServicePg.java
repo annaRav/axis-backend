@@ -4,7 +4,9 @@ import com.axis.common.exception.BusinessException;
 import com.axis.common.exception.ResourceNotFoundException;
 import com.axis.common.security.SecurityUtils;
 import com.axis.goal.mapper.GoalMapper;
-import com.axis.goal.model.dto.*;
+import com.axis.goal.model.dto.GoalRequest;
+import com.axis.goal.model.dto.GoalResponse;
+import com.axis.goal.model.dto.PageResponse;
 import com.axis.goal.model.entity.CustomFieldDefinition;
 import com.axis.goal.model.entity.Goal;
 import com.axis.goal.model.entity.Goal.GoalStatus;
@@ -62,27 +64,6 @@ public class GoalServicePg implements GoalService {
         goalRepository.persist(goal);
         log.info("Created goal with id: {} for user: {}", goal.getId(), userId);
 
-        return goalMapper.toResponse(goal);
-    }
-
-    @Override
-    @Transactional
-    public GoalResponse update(UUID id, GoalRequest request) {
-        UUID userId = getCurrentUserId();
-        log.debug("Updating goal: {} for user: {}", id, userId);
-
-        Goal goal = goalRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", id));
-
-        // Fetch and validate the GoalType if it's being updated
-        GoalType goalType = goalTypeRepository.findByIdAndUserId(request.typeId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("GoalType", request.typeId()));
-
-        goalMapper.updateEntity(request, goal);
-        goal.setType(goalType);
-        setupCustomFieldAnswers(goal);
-
-        log.info("Updated goal: {} for user: {}", id, userId);
         return goalMapper.toResponse(goal);
     }
 

@@ -2,39 +2,69 @@
 
 Gateway API - это современная замена Ingress с более мощными возможностями routing.
 
+Проект использует **NGINX Gateway Fabric** версии 1.5.0 от F5/NGINX Inc. как реализацию Gateway API.
+
 ## Установка в Minikube
 
 ### 1. Установить Gateway API CRDs
 
 ```bash
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
+kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.0" | kubectl apply -f -
 ```
 
-### 2. Установить Nginx Gateway Controller
+### 2. Установить NGINX Gateway Fabric Controller
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/main/examples/implementations/nginx/nginx-gateway-controller.yaml
+# Установить CRDs для NGINX Gateway Fabric
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.5.0/deploy/crds.yaml
+
+# Установить контроллер
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.5.0/deploy/default/deploy.yaml
 ```
 
-Или используйте другой контроллер:
-- **Envoy Gateway** (рекомендуется для production): https://gateway.envoyproxy.io
+**Примечание:** cert-manager НЕ требуется для базовой установки.
+
+**Альтернативные контроллеры:**
+- **Envoy Gateway**: https://gateway.envoyproxy.io
 - **Istio Gateway**: https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/
 - **Traefik**: https://doc.traefik.io/traefik/routing/providers/kubernetes-gateway/
 
-### 3. Проверить что CRDs установлены
+### 3. Проверить что контроллер установлен
 
 ```bash
+# Проверить namespace
+kubectl get namespace nginx-gateway
+
+# Проверить что pod запущен (может занять 1-2 минуты)
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=nginx-gateway -n nginx-gateway --timeout=120s
+
+# Проверить статус
+kubectl get pods -n nginx-gateway
 kubectl get gatewayclass
-kubectl get gateway -A
+```
+
+Вы должны увидеть:
+```
+NAME                             READY   STATUS    RESTARTS   AGE
+nginx-gateway-575fccd7f6-xxxxx   2/2     Running   0          1m
+
+NAME    CONTROLLER                                      ACCEPTED   AGE
+nginx   gateway.nginx.org/nginx-gateway-controller      True       1m
 ```
 
 ### 4. Развернуть приложение
 
 ```bash
-# Удалить старый deployment (если есть)
-kubectl delete namespace axis
+# Настроить Docker для Minikube
+eval $(minikube docker-env)
 
 # Развернуть с Gateway API
+skaffold dev
+```
+
+**Примечание:** Если требуется чистая установка:
+```bash
+kubectl delete namespace axis
 skaffold dev
 ```
 
@@ -166,8 +196,11 @@ rules:
 kubectl describe gateway axis-gateway -n axis
 
 # Проверить Gateway Controller
-kubectl get pods -n gateway-system
-kubectl logs -n gateway-system -l app=nginx-gateway-controller
+kubectl get pods -n nginx-gateway
+kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway -c nginx-gateway
+
+# Проверить логи NGINX data plane
+kubectl logs -n nginx-gateway -l app.kubernetes.io/name=nginx-gateway -c nginx
 ```
 
 ### HTTPRoute не работает
@@ -178,6 +211,9 @@ kubectl describe httproute goal-route -n axis
 
 # Посмотреть события
 kubectl get events -n axis
+
+# Проверить что Gateway принял маршрут
+kubectl get httproute -n axis -o wide
 ```
 
 ### 404 Not Found
@@ -186,6 +222,67 @@ kubectl get events -n axis
 ```bash
 kubectl get svc -n axis
 kubectl get pods -n axis
+
+# Проверить endpoint'ы
+kubectl get endpoints -n axis
+```
+
+### Controller не запускается
+
+```bash
+# Проверить события
+kubectl get events -n nginx-gateway --sort-by='.lastTimestamp'
+
+# Проверить логи
+kubectl logs -n nginx-gateway deployment/nginx-gateway --all-containers
+
+# Переустановить контроллер
+kubectl delete namespace nginx-gateway
+kubectl delete gatewayclass nginx
+# Затем повторить установку с шага 1
+```
+
+## Полная установка (Quick Start)
+
+Для нового кластера или коллеги:
+
+```bash
+# 1. Запустить Minikube
+minikube start
+
+# 2. Установить Gateway API CRDs
+kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.0" | kubectl apply -f -
+
+# 3. Установить NGINX Gateway Fabric
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.5.0/deploy/crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.5.0/deploy/default/deploy.yaml
+
+# 4. Подождать готовности контроллера
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=nginx-gateway -n nginx-gateway --timeout=120s
+
+# 5. Проверить установку
+kubectl get gatewayclass
+kubectl get pods -n nginx-gateway
+
+# 6. Запустить приложение
+eval $(minikube docker-env)
+skaffold dev
+```
+
+## Обновление версии
+
+Для обновления на новую версию NGINX Gateway Fabric:
+
+```bash
+# Проверить текущую версию
+kubectl get deployment nginx-gateway -n nginx-gateway -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+# Обновить на v2.4.1 (последняя стабильная)
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.1/deploy/crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.1/deploy/default/deploy.yaml
+
+# Проверить статус обновления
+kubectl rollout status deployment/nginx-gateway -n nginx-gateway
 ```
 
 ## Migration Path
@@ -193,10 +290,17 @@ kubectl get pods -n axis
 Если позже захотите вернуться к простому Ingress:
 ```bash
 # Удалить Gateway API ресурсы
-kubectl delete -f k8s/base/gateway-api.yaml
+kubectl delete -f k8s/gateway-api.yaml
+
+# Удалить NGINX Gateway Fabric
+kubectl delete namespace nginx-gateway
+kubectl delete gatewayclass nginx
+
+# Включить Ingress addon в Minikube
+minikube addons enable ingress
 
 # Применить старый Ingress
-kubectl apply -f k8s/base/ingress.yaml
+kubectl apply -f k8s/ingress.yaml
 ```
 
 ## Рекомендации
@@ -206,3 +310,27 @@ kubectl apply -f k8s/base/ingress.yaml
 - ✅ **Стабильный** (GA v1.0)
 - ✅ **Будущее** Kubernetes networking
 - ✅ **Не нужен service mesh** для advanced routing
+- ✅ **cert-manager не требуется** для базовой установки
+
+## Дополнительные ресурсы
+
+### Документация
+
+- **NGINX Gateway Fabric**: https://docs.nginx.com/nginx-gateway-fabric/
+- **Gateway API**: https://gateway-api.sigs.k8s.io/
+- **GitHub Repository**: https://github.com/nginx/nginx-gateway-fabric
+- **Release Notes**: https://github.com/nginx/nginx-gateway-fabric/releases
+
+### Примеры конфигурации
+
+- **HTTPRoute примеры**: https://docs.nginx.com/nginx-gateway-fabric/examples/
+- **Gateway API гайды**: https://gateway-api.sigs.k8s.io/guides/
+- **Traffic Splitting**: https://gateway-api.sigs.k8s.io/guides/traffic-splitting/
+
+### Используемая версия в проекте
+
+- **NGINX Gateway Fabric**: v1.5.0
+- **Gateway API**: v1.2.0
+- **Deployment**: default (без cert-manager)
+- **Namespace**: nginx-gateway
+- **GatewayClass**: nginx

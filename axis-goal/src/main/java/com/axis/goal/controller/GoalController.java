@@ -48,25 +48,6 @@ public class GoalController {
     }
 
     @Operation(
-        summary = "Update an existing goal",
-        description = "Updates an existing goal. Only the owner can update their goals."
-    )
-    @APIResponses(value = {
-        @APIResponse(responseCode = "200", description = "Goal updated successfully"),
-        @APIResponse(responseCode = "400", description = "Invalid request data"),
-        @APIResponse(responseCode = "401", description = "User not authenticated"),
-        @APIResponse(responseCode = "404", description = "Goal not found")
-    })
-    @PUT
-    @Path("/{id}")
-    public GoalResponse update(
-            @Parameter(description = "Goal ID") @PathParam("id") UUID id,
-            @Valid GoalRequest request) {
-        log.debug("Updating goal: {}", id);
-        return goalService.update(id, request);
-    }
-
-    @Operation(
             summary = "Partially update goal",
             description = "Updates only the provided fields (partial update - null fields are ignored)"
     )

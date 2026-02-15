@@ -14,11 +14,6 @@ public interface GoalTypeService {
     GoalTypeResponse create(GoalTypeRequest request);
 
     /**
-     * Update an existing goal type configuration (full update)
-     */
-    GoalTypeResponse update(UUID id, GoalTypeRequest request);
-
-    /**
      * Partially update an existing goal type configuration (only non-null fields)
      */
     GoalTypeResponse patch(UUID id, GoalTypeRequest request);

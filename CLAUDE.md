@@ -38,7 +38,7 @@ All services use these core extensions:
 - **quarkus-oidc** (Keycloak integration)
 - **quarkus-smallrye-jwt** (JWT processing)
 - **quarkus-smallrye-health** (Health checks at `/actuator/health`)
-- **quarkus-micrometer-registry-prometheus** (Metrics at `/actuator/prometheus`)
+- **quarkus-micrometer-registry-prometheus** (Metrics at `/q/metrics` - Prometheus format)
 - **quarkus-smallrye-openapi** (OpenAPI/Swagger documentation)
 - **quarkus-hibernate-validator** (Bean Validation)
 
@@ -76,6 +76,7 @@ Skaffold will build 3 JVM Docker images, deploy all infrastructure (PostgreSQL, 
 - API Gateway: http://localhost:8080
 - Keycloak: http://localhost:8180
 - RabbitMQ Management: http://localhost:15672
+- Prometheus: http://localhost:9090
 - PostgreSQL: localhost:5433
 - MongoDB: localhost:27017
 - Redis: localhost:6379
@@ -103,12 +104,13 @@ k8s/
 ├── config/                   # ConfigMaps and Secrets
 │   ├── configmaps.yaml
 │   └── secrets.yaml
-└── infrastructure/           # Keycloak, PostgreSQL, MongoDB, RabbitMQ, Redis
+└── infrastructure/           # Keycloak, PostgreSQL, MongoDB, RabbitMQ, Redis, Prometheus
     ├── postgres-app.yaml
     ├── keycloak.yaml
     ├── mongodb.yaml
     ├── rabbitmq.yaml
     ├── redis.yaml
+    ├── prometheus.yaml
     └── keycloak-realm-config.yaml
 ```
 
@@ -265,8 +267,9 @@ quarkus.oidc.credentials.secret=${KEYCLOAK_CLIENT_SECRET:secret}
 # SmallRye Health
 quarkus.smallrye-health.root-path=/actuator/health
 
-# Micrometer Prometheus
-quarkus.micrometer.export.prometheus.path=/actuator/prometheus
+# Micrometer Prometheus (default path: /q/metrics)
+# Optional: customize path to /actuator/prometheus for consistency with Spring Boot
+# quarkus.micrometer.export.prometheus.path=/actuator/prometheus
 
 # OpenAPI / Swagger
 quarkus.smallrye-openapi.path=/swagger
@@ -298,6 +301,7 @@ All resources deployed to `axis` namespace.
 - Gateway: http://localhost:8080
 - Keycloak: http://localhost:8180
 - RabbitMQ Management: http://localhost:15672
+- Prometheus: http://localhost:9090
 
 ### Keycloak Configuration
 
@@ -313,6 +317,7 @@ Realm `axis` is auto-imported with:
 - `mongodb`: Document storage (media files)
 - `rabbitmq`: Message broker
 - `redis`: Caching
+- `prometheus`: Metrics collection and monitoring (scrapes `/q/metrics` from all services)
 
 ## API Routing
 
@@ -332,7 +337,7 @@ Nginx Ingress Controller routes requests based on path patterns:
   -> http://axis-media:8083
 ```
 
-Authentication is handled by each service using Quarkus OIDC extension. Health and metrics endpoints (`/actuator/**`) are typically public or secured at the infrastructure level.
+Authentication is handled by each service using Quarkus OIDC extension. Health endpoints (`/actuator/health`) and metrics endpoints (`/q/metrics`) are typically public or secured at the infrastructure level. Prometheus automatically scrapes metrics from all services.
 
 ## Notification Service (axis-notification)
 

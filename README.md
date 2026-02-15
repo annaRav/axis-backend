@@ -25,13 +25,13 @@ A microservices-based life goals planning platform (similar to Trello) built wit
 ## Technology Stack
 
 - Java 21
-- Spring Boot 3.4.1
-- Spring Cloud 2024.0.0
+- Quarkus 3.20.x LTS (supersonic subatomic Java framework)
 - Keycloak 24.0 (Identity Provider)
-- PostgreSQL (for Keycloak and future application data)
+- PostgreSQL (for Keycloak and application data)
 - MongoDB 7 (for media storage)
 - RabbitMQ 3 (message broker)
 - Redis 7 (caching)
+- Prometheus (metrics and monitoring)
 - Kubernetes (Minikube)
 - Skaffold (local development)
 
@@ -60,6 +60,7 @@ skaffold dev
 # Gateway: http://localhost:8080
 # Keycloak: http://localhost:8180
 # RabbitMQ Management: http://localhost:15672
+# Prometheus: http://localhost:9090
 ```
 
 ## Keycloak Setup
